@@ -1,0 +1,22 @@
+# Xcode
+DerivedData/
+build/
+**/Preview Content/
+Preview Content/
+*.xcuserstate
+*.xcworkspace
+*.xcodeproj/project.xcworkspace/
+*.xcodeproj/xcuserdata/
+*.xcodeproj/xcshareddata/
+
+# Preview files
+**/Preview Assets/
+Preview Assets/
+**/manga-sample*
+**/mangas-sample*
+
+# SwiftPM
+.build/
+
+# macOS
+.DS_Store
