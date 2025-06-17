@@ -59,16 +59,26 @@ struct Manga: Codable, Identifiable, Hashable {
     var cleanSynopsis: String? {
         guard let synopsis = synopsis else { return nil }
 
-        // Remover texto entre corchetes al final
-        let pattern = #"\s*\[Written by.*?\]\s*$"#
-        let cleanedText = synopsis.replacingOccurrences(
-            of: pattern,
-            with: "",
+        var cleanedText = synopsis
+
+        // Remover texto entre corchetes (incluyendo "Written by MAL Rewrite" y similares)
+        // No requiere que esté al final del string
+        let bracketsPattern = #"\s*\[Written by.*?\]\s*"#
+        cleanedText = cleanedText.replacingOccurrences(
+            of: bracketsPattern,
+            with: " ",  // Necesita este espacio
+            options: .regularExpression
+        )
+
+        // Remover texto con patrón "(Source : xyz)" al final
+        let sourcePattern = #"\s*\(Source\s*:\s*.*?\)\s*$"#
+        cleanedText = cleanedText.replacingOccurrences(
+            of: sourcePattern,
+            with: " ",  // Necesita este espacio
             options: .regularExpression
         )
 
         let result = cleanedText.trimmingCharacters(in: .whitespacesAndNewlines)
-
         return result.isEmpty ? nil : result
     }
 
