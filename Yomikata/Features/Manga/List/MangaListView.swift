@@ -15,6 +15,12 @@ struct MangaListView: View {
             .navigationTitle(
                 "mangas.navigation.title".localized(fallback: "Mangas")
             )
+            .searchable(text: $viewModel.searchText)
+            .onChange(of: viewModel.searchText) {
+                Task {
+                    await viewModel.searchMangas()
+                }
+            }
             .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
@@ -24,7 +30,7 @@ struct MangaListView: View {
                             systemName: viewModel.isGridView
                                 ? "list.bullet" : "square.grid.2x2"
                         )
-                        .font(.title2)
+                        .font(.title3)
                     }
                 }
             }
@@ -94,6 +100,32 @@ struct MangaListView: View {
                     .padding(.bottom, 20)
                 }
             }
+            .overlay {
+                // Sin resultados de búsqueda
+                if !viewModel.searchText.isEmpty && viewModel.mangas.isEmpty
+                    && !viewModel.isLoading
+                {
+                    VStack(spacing: 16) {
+                        Image(systemName: "magnifyingglass")
+                            .font(.system(size: 48))
+                            .foregroundColor(.gray)
+
+                        Text(
+                            "search.no_results.mangas".localized(
+                                fallback: "No mangas found")
+                        )
+                        .font(.headline)
+
+                        Text(
+                            "search.try_different".localized(
+                                fallback: "Try a different search term")
+                        )
+                        .font(.caption)
+                        .foregroundColor(.secondary)
+                    }
+                    .padding()
+                }
+            }
         }
     }
 }
@@ -115,13 +147,15 @@ extension MangaListView {
             }
         }
     }
-    
+
     private var gridView: some View {
         ScrollView {
-            LazyVGrid(columns: [
-                GridItem(.flexible()),
-                GridItem(.flexible())
-            ], spacing: 16) {
+            LazyVGrid(
+                columns: [
+                    GridItem(.flexible()),
+                    GridItem(.flexible()),
+                ], spacing: 16
+            ) {
                 ForEach(viewModel.mangas) { manga in
                     MangaGridCard(manga: manga)
                         .onAppear {

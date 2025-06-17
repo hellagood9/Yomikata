@@ -8,6 +8,8 @@ final class MangaListViewModel {
     var isLoading = false
     var isLoadingMore = false
     var errorMessage: String?
+    var searchText = ""
+    private var searchTask: Task<Void, Never>?
     var isGridView = false
 
     // MARK: - Dependencies
@@ -79,6 +81,37 @@ final class MangaListViewModel {
     func refreshMangas() async {
         await loadMangas()
     }
+
+    /// Busca mangas por su titulo
+        func searchMangas() async {
+            // Cancelar búsqueda anterior
+            searchTask?.cancel()
+    
+            // Nueva tarea con debounce
+            searchTask = Task {
+                try? await Task.sleep(nanoseconds: 300_000_000)  // 0.3 segundos
+    
+                guard !Task.isCancelled else { return }
+    
+                if searchText.isEmpty {
+                    await loadMangas()
+                } else {
+                    isLoading = true
+                    defer { isLoading = false }
+    
+                    do {
+                        let response = try await apiService.searchMangasContains(
+                            searchText)
+                        guard !Task.isCancelled else { return }
+                        mangas = response.items
+                        errorMessage = nil
+                    } catch {
+                        guard !Task.isCancelled else { return }
+                        errorMessage = error.localizedDescription
+                    }
+                }
+            }
+        }
 
     // MARK: - Computed Properties
 

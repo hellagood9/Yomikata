@@ -22,6 +22,7 @@
 "search.placeholder.generic" = "Search...";
 "search.no_results.generic" = "No results found";
 "search.results.generic" = "Search results";
+"search.try_different" = "Try a different search term";
 
 "mangas.navigation.title" = "Mangas";
 

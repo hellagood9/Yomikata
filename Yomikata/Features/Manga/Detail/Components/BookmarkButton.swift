@@ -11,7 +11,7 @@ struct BookmarkButton: View {
             }
         }) {
             Image(systemName: isBookmarked ? "bookmark.fill" : "bookmark")
-                .font(.title2)
+                .font(.title3)
                 .foregroundColor(isBookmarked ? .accentColor : .gray)
         }
     }
