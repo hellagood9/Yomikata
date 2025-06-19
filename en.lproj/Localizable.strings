@@ -60,6 +60,8 @@
 "volumes.na" = "Volumes: N/A";
 "volumes.value" = "Volumes: %d";
 
+"general.na" = "N/A";
+
 "detail.author_by" = "by";
 "detail.information" = "Information";
 "detail.chapters" = "Chapters";

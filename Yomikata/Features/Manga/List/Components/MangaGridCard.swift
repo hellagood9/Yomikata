@@ -9,7 +9,8 @@ struct MangaGridCard: View {
                 // Imagen más grande para grid
                 MangaMainPicture(
                     url: manga.cleanImageURL,
-                    assetName: manga.assetImageName
+                    assetName: manga.assetImageName,
+                    iconSize: 48
                 )
                 .aspectRatio(2 / 3, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 8))

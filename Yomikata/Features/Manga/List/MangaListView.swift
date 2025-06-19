@@ -34,7 +34,6 @@ struct MangaListView: View {
                     }
                 }
             }
-            .listStyle(.plain)
             .animation(.easeInOut(duration: 0.2), value: viewModel.mangas)  // Suaviza el "tirón" al cargar + mangas
             .refreshable {
                 await viewModel.refreshMangas()
@@ -146,6 +145,7 @@ extension MangaListView {
                     }
             }
         }
+        .listStyle(.plain)
     }
 
     private var gridView: some View {
