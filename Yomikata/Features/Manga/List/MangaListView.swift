@@ -149,26 +149,13 @@ extension MangaListView {
     }
 
     private var gridView: some View {
-        ScrollView {
-            LazyVGrid(
-                columns: [
-                    GridItem(.flexible()),
-                    GridItem(.flexible()),
-                ], spacing: 16
-            ) {
-                ForEach(viewModel.mangas) { manga in
-                    MangaGridCard(manga: manga)
-                        .onAppear {
-                            if manga.id == viewModel.mangas.last?.id {
-                                Task {
-                                    await viewModel.loadMoreMangas()
-                                }
-                            }
-                        }
-                }
+        MangaGrid(
+            mangas: viewModel.mangas,
+            columns: 2,
+            onLoadMore: {
+                await viewModel.loadMoreMangas()
             }
-            .padding()
-        }
+        )
     }
 }
 

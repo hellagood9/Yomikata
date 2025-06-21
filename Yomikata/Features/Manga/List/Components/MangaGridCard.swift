@@ -1,8 +1,51 @@
 import SwiftUI
 
+struct MangaGrid: View {
+    let mangas: [Manga]
+    let columns: Int
+    let spacing: CGFloat
+    let onLoadMore: (() async -> Void)?
+
+    init(
+        mangas: [Manga],
+        columns: Int = 2,
+        spacing: CGFloat = 16,
+        onLoadMore: (() async -> Void)? = nil
+    ) {
+        self.mangas = mangas
+        self.columns = columns
+        self.spacing = spacing
+        self.onLoadMore = onLoadMore
+    }
+
+    var body: some View {
+        ScrollView {
+            LazyVGrid(
+                columns: Array(
+                    repeating: GridItem(.flexible()), count: columns),
+                spacing: spacing
+            ) {
+                ForEach(mangas) { manga in
+                    MangaGridCard(manga: manga)
+                        .onAppear {
+                            // Solo ejecutar onLoadMore si está disponible
+                            if let onLoadMore = onLoadMore,
+                                manga.id == mangas.last?.id
+                            {
+                                Task {
+                                    await onLoadMore()
+                                }
+                            }
+                        }
+                }
+            }
+            .padding()
+        }
+    }
+}
+
 struct MangaGridCard: View {
     let manga: Manga
-
     var body: some View {
         NavigationLink(destination: MangaDetailView(manga: manga)) {
             VStack(alignment: .leading, spacing: 8) {
@@ -14,7 +57,6 @@ struct MangaGridCard: View {
                 )
                 .aspectRatio(2 / 3, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
-
                 // Info compacta
                 VStack(alignment: .leading, spacing: 2) {
                     Text(manga.title)
@@ -22,7 +64,6 @@ struct MangaGridCard: View {
                         .fontWeight(.medium)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
-
                     if let score = manga.score {
                         HStack(spacing: 2) {
                             Image(systemName: "star.fill")
@@ -34,7 +75,6 @@ struct MangaGridCard: View {
                         }
                     }
                 }
-
                 Spacer(minLength: 0)
             }
         }
