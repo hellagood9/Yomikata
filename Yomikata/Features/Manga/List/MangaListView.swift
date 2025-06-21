@@ -23,10 +23,15 @@ struct MangaListView: View {
             }
             .toolbar {
                 ToolbarItem(placement: .topBarLeading) {
-                    Menu("filter.genre".localized(fallback: "Genre")) {
-                        Button("filter.all".localized(fallback: "All")) {
+                    Menu(
+                        viewModel.selectedGenre.isEmpty
+                            ? "filter.genre".localized()
+                            : viewModel.selectedGenre.localizedGenre
+                    ) {
+                        Button("filter.all".localized()) {
                             Task {
-                                await viewModel.filterByGenre("")
+                                viewModel.selectedGenre = ""
+                                await viewModel.loadMangas()
                             }
                         }
 
@@ -60,6 +65,7 @@ struct MangaListView: View {
             }
             .task {
                 await viewModel.loadMangasIfNeeded()
+                await viewModel.loadGenres()
             }
             .overlay {
                 // Loading state inicial
@@ -67,9 +73,13 @@ struct MangaListView: View {
                     VStack(spacing: 16) {
                         ProgressView()
                             .scaleEffect(1.2)
-                        Text("loading.mangas".localized())
-                            .font(.headline)
-                            .foregroundColor(.secondary)
+                        Text(
+                            viewModel.selectedGenre.isEmpty
+                                ? "loading.mangas".localized()
+                                : "loading.filtering".localized()
+                        )
+                        .font(.headline)
+                        .foregroundColor(.secondary)
                     }
                 }
             }

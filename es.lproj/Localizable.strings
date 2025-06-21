@@ -13,6 +13,7 @@
 "loading.initial" = "Cargando...";
 "loading.more" = "Cargando más...";
 "loading.mangas" = "Cargando mangas...";
+"loading.filtering" = "Filtrando...";
 "loading.retry" = "Reintentar";
 "loading.error_title" = "Error al cargar";
 
@@ -23,6 +24,10 @@
 "search.no_results.generic" = "No se encontraron resultados";
 "search.results.generic" = "Resultados de búsqueda";
 "search.try_different" = "Prueba con otro término de búsqueda";
+
+"filter.all" = "Todos";
+"filter.no_results" = "No se encontraron coincidencias";
+"filter.genre" = "Género";
 
 "mangas.navigation.title" = "Mangas";
 

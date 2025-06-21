@@ -13,13 +13,14 @@ final class MangaListViewModel {
     var isGridView = false
     private var searchTask: Task<Void, Never>?
 
-    let availableGenres = [
-        "Action", "Adventure", "Award Winning", "Drama", "Fantasy",
-        "Horror", "Supernatural", "Mystery", "Slice of Life", "Comedy",
-        "Sci-Fi", "Suspense", "Sports", "Ecchi", "Romance",
-        "Girls Love", "Boys Love", "Gourmet", "Erotica", "Hentai",
-        "Avant Garde",
-    ]
+    var availableGenres: [String] = []
+    //    let availableGenres = [
+    //        "Action", "Adventure", "Award Winning", "Drama", "Fantasy",
+    //        "Horror", "Supernatural", "Mystery", "Slice of Life", "Comedy",
+    //        "Sci-Fi", "Suspense", "Sports", "Ecchi", "Romance",
+    //        "Girls Love", "Boys Love", "Gourmet", "Erotica", "Hentai",
+    //        "Avant Garde",
+    //    ]
 
     // MARK: - Dependencies
     private let apiService = APIService()
@@ -91,6 +92,15 @@ final class MangaListViewModel {
         await loadMangas()
     }
 
+    /// Carga los géneros
+    func loadGenres() async {
+        do {
+            availableGenres = try await apiService.getGenres()
+        } catch {
+            print("🔥 Error loading genres: \(error)")
+        }
+    }
+
     /// Busca mangas por su titulo
     func searchMangas() async {
         // Cancelar búsqueda anterior
@@ -130,12 +140,8 @@ final class MangaListViewModel {
         defer { isLoading = false }
 
         do {
-            if genre.isEmpty {
-                await loadMangas()
-            } else {
-                let response = try await apiService.getMangasByGenre(genre)
-                mangas = response.items
-            }
+            let response = try await apiService.getMangasByGenre(genre)
+            mangas = response.items
             errorMessage = nil
         } catch {
             errorMessage = error.localizedDescription

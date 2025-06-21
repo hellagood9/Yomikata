@@ -62,26 +62,43 @@ final class APIService {
         return try await URLSession.shared.getJSON(
             from: request, type: PaginatedResponse<[Manga]>.self)
     }
-    
+
     func searchAuthors(_ text: String) async throws -> [Author] {
         let endpoint = "\(APIEndpoint.Search.author(text))"
         guard let url = URL(string: "\(APIConstants.baseURL)\(endpoint)") else {
             throw NetworkError.invalidURL
         }
         let request = URLRequest.get(url: url)
-        return try await URLSession.shared.getJSON(from: request, type: [Author].self)
+        return try await URLSession.shared.getJSON(
+            from: request, type: [Author].self)
     }
-    
-    func getMangasByAuthor(_ authorId: String, page: Int = 1, per: Int = APIConstants.defaultItemsPerPage) async throws -> PaginatedResponse<[Manga]> {
-        let endpoint = "\(APIEndpoint.List.mangaByAuthor(authorId))?page=\(page)&per=\(per)"
+
+    func getGenres() async throws -> [String] {
+        let endpoint = APIEndpoint.List.genres
+        guard let url = URL(string: "\(APIConstants.baseURL)\(endpoint)") else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = URLRequest.get(url: url)
+        return try await URLSession.shared.getJSON(
+            from: request, type: [String].self)
+    }
+
+    // MARK: - Filter Operations
+
+    func getMangasByAuthor(
+        _ authorId: String, page: Int = 1,
+        per: Int = APIConstants.defaultItemsPerPage
+    ) async throws -> PaginatedResponse<[Manga]> {
+        let endpoint =
+            "\(APIEndpoint.List.mangaByAuthor(authorId))?page=\(page)&per=\(per)"
         guard let url = URL(string: "\(APIConstants.baseURL)\(endpoint)") else {
             throw NetworkError.invalidURL
         }
         let request = URLRequest.get(url: url)
-        return try await URLSession.shared.getJSON(from: request, type: PaginatedResponse<[Manga]>.self)
+        return try await URLSession.shared.getJSON(
+            from: request, type: PaginatedResponse<[Manga]>.self)
     }
-
-    // MARK: - Filter Operations
 
     func getMangasByGenre(
         _ genre: String, page: Int = 1,
