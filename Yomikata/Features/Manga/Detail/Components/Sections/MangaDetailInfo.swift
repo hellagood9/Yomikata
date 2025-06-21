@@ -13,7 +13,7 @@ struct MangaDetailInfo: View {
                 columns: [
                     GridItem(.flexible()),
                     GridItem(.flexible()),
-                ], spacing: 12
+                ], spacing: 10
             ) {
                 InfoCard(
                     title: "detail.chapters".localized(),

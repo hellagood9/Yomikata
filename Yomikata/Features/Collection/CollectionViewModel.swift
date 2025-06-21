@@ -9,7 +9,18 @@ final class CollectionViewModel {
     var isLoading = false
     var errorMessage: String?
 
-    // MARK: - Dependencies
+    var stats: CollectionStats {
+        CollectionStats(
+            totalMangas: collectionMangas.count,
+            completedCollections: collectionMangas.filter {
+                $0.completeCollection
+            }.count,
+            totalVolumesOwned: collectionMangas.reduce(0) {
+                $0 + $1.volumesOwned.count
+            }
+        )
+    }
+
     private let collectionService: CollectionService
 
     // MARK: - Initialization
@@ -24,7 +35,6 @@ final class CollectionViewModel {
     func loadCollection() async {
         isLoading = true
         errorMessage = nil
-
         defer { isLoading = false }
 
         collectionMangas = collectionService.getCollection()
@@ -35,7 +45,6 @@ final class CollectionViewModel {
     func removeFromCollection(_ collectionManga: MangaCollection) async {
         let success = collectionService.removeFromCollection(
             collectionManga.manga)
-
         if success {
             collectionMangas.removeAll {
                 $0.manga.id == collectionManga.manga.id
@@ -51,15 +60,47 @@ final class CollectionViewModel {
         return collectionService.isInCollection(manga)
     }
 
-    /// Añade un manga a la colección
-    func addToCollection(_ manga: Manga) async {
-        let success = collectionService.addToCollection(manga)
+    func addToCollection(
+        manga: Manga,
+        volumesOwned: [Int],
+        readingVolume: Int?,
+        completeCollection: Bool
+    ) async {
+        let item = MangaCollection(
+            manga: manga,
+            volumesOwned: volumesOwned,
+            readingVolume: readingVolume,
+            completeCollection: completeCollection
+        )
 
+        let success = collectionService.addToCollection(item)
         if success {
             await loadCollection()
             print("✅ Added \(manga.title) to collection")
         } else {
             errorMessage = "collection.error.add".localized()
+        }
+    }
+
+    func updateCollection(
+        manga: Manga,
+        volumesOwned: [Int],
+        readingVolume: Int?,
+        completeCollection: Bool
+    ) async {
+        let updated = MangaCollection(
+            manga: manga,
+            volumesOwned: volumesOwned,
+            readingVolume: readingVolume,
+            completeCollection: completeCollection
+        )
+
+        let success = collectionService.updateInCollection(updated)
+        if success {
+            await loadCollection()
+            print("✏️ Updated \(manga.title) in collection")
+        } else {
+            errorMessage = "collection.error.update".localized()
         }
     }
 

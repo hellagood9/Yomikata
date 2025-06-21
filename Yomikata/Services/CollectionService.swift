@@ -28,48 +28,34 @@ final class CollectionService {
         return collection.contains { $0.manga.id == manga.id }
     }
 
-    /// Añade un manga a la colección
-    func addToCollection(
-        _ manga: Manga, volumesPurchased: Int = 0, currentVolume: Int = 1,
-        isCompleteCollection: Bool = false
-    ) -> Bool {
-        // Verificar si ya existe
-        if isInCollection(manga) {
-            print("⚠️ Manga \(manga.title) already in collection")
+    /// Añade el manga a  la colección
+    func addToCollection(_ item: MangaCollection) -> Bool {
+        if isInCollection(item.manga) {
+            print("⚠️ Manga \(item.manga.title) already in collection")
             return false
         }
 
         var collection = getCollection()
-        let collectionManga = MangaCollection(
-            manga: manga,
-            volumesPurchased: volumesPurchased,
-            currentVolume: currentVolume,
-            isCompleteCollection: isCompleteCollection
-        )
-
-        collection.append(collectionManga)
+        collection.append(item)
         return storage.saveArray(collection, forKey: collectionKey)
     }
 
     /// Actualiza un manga en la colección
-    func updateInCollection(
-        _ manga: Manga, volumesPurchased: Int, currentVolume: Int,
-        isCompleteCollection: Bool
-    ) -> Bool {
+    func updateInCollection(_ item: MangaCollection) -> Bool {
         var collection = getCollection()
 
         guard
-            let index = collection.firstIndex(where: { $0.manga.id == manga.id }
-            )
+            let index = collection.firstIndex(where: {
+                $0.manga.id == item.manga.id
+            })
         else {
-            print("⚠️ Manga \(manga.title) not found in collection")
+            print(
+                "⚠️ Manga \(item.manga.title) not found in collection for update"
+            )
             return false
         }
 
-        collection[index].volumesPurchased = volumesPurchased
-        collection[index].currentVolume = currentVolume
-        collection[index].isCompleteCollection = isCompleteCollection
-
+        collection[index] = item
         return storage.saveArray(collection, forKey: collectionKey)
     }
 
@@ -100,10 +86,10 @@ final class CollectionService {
         let collection = getCollection()
 
         let totalMangas = collection.count
-        let completedCollections = collection.filter { $0.isCompleteCollection }
+        let completedCollections = collection.filter { $0.completeCollection }
             .count
         let totalVolumesOwned = collection.reduce(0) {
-            $0 + $1.volumesPurchased
+            $0 + $1.volumesOwned.count
         }
 
         return CollectionStats(

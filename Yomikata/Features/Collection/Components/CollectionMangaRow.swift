@@ -3,14 +3,15 @@ import SwiftUI
 struct CollectionMangaRow: View {
     let mangaCollection: MangaCollection
     let onRemove: () -> Void
+    let onEdit: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(spacing: 10) {
             MangaMainPicture(
                 url: mangaCollection.manga.cleanImageURL,
                 assetName: mangaCollection.manga.assetImageName
             )
-            .frame(width: 50, height: 70)
+            .frame(width: 40, height: 60)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(mangaCollection.manga.title)
@@ -28,13 +29,26 @@ struct CollectionMangaRow: View {
 
             Spacer()
 
-            // Bookmark button para quitar de colección
-            Button(action: onRemove) {
-                Image(systemName: "bookmark.fill")
-                    .font(.title2)
-                    .foregroundColor(.accentColor)
+            VStack(spacing: 8) {
+                Button(action: onEdit) {
+                    Image(systemName: "pencil")
+                        .font(.title3)
+                        .foregroundColor(.blue)
+                        .frame(width: 32, height: 32)
+                        .background(Color.gray.opacity(0.1))
+                        .clipShape(Circle())
+                }
+
+                Button(action: onRemove) {
+                    Image(systemName: "bookmark.fill")
+                        .font(.title3)
+                        .foregroundColor(.accentColor)
+                        .frame(width: 32, height: 32)
+                        .background(Color.accentColor.opacity(0.1))
+                        .clipShape(Circle())
+                }
             }
-            .buttonStyle(PlainButtonStyle())
+            .buttonStyle(.plain)
         }
         .padding(.vertical, 4)
     }
@@ -45,11 +59,13 @@ struct CollectionMangaRow: View {
         CollectionMangaRow(
             mangaCollection: MangaCollection(
                 manga: .preview,
-                volumesPurchased: 15,
-                currentVolume: 12,
-                isCompleteCollection: false
+                volumesOwned: Array(1...15),
+                readingVolume: 12,
+                completeCollection: false
             ),
-            onRemove: {}
-        )        
+            onRemove: {},
+            onEdit: {}
+        )
     }
+    .listStyle(.plain)
 }

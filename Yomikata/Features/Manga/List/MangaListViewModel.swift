@@ -14,13 +14,6 @@ final class MangaListViewModel {
     private var searchTask: Task<Void, Never>?
 
     var availableGenres: [String] = []
-    //    let availableGenres = [
-    //        "Action", "Adventure", "Award Winning", "Drama", "Fantasy",
-    //        "Horror", "Supernatural", "Mystery", "Slice of Life", "Comedy",
-    //        "Sci-Fi", "Suspense", "Sports", "Ecchi", "Romance",
-    //        "Girls Love", "Boys Love", "Gourmet", "Erotica", "Hentai",
-    //        "Avant Garde",
-    //    ]
 
     // MARK: - Dependencies
     private let apiService = APIService()

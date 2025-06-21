@@ -187,6 +187,7 @@ extension MangaListView {
             }
         )
     }
+
 }
 
 #Preview {

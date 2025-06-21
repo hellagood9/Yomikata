@@ -3,6 +3,7 @@ import SwiftUI
 struct MangaDetailView: View {
     let manga: Manga
     @State private var viewModel = MangaDetailViewModel()
+    @State private var showAddSheet = false
     
     var body: some View {
         ScrollView {
@@ -21,21 +22,34 @@ struct MangaDetailView: View {
                 BookmarkButton(
                     isBookmarked: viewModel.isInCollection,
                     action: {
-                        Task {
-                            await viewModel.toggleCollection(for: manga)
+                        if viewModel.isInCollection {
+                            Task {
+                                await viewModel.removeFromCollection(manga)
+                            }
+                        } else {
+                            showAddSheet = true
                         }
                     }
                 )
             }
         }
+        .sheet(isPresented: $showAddSheet) {
+            AddToCollectionSheet(
+                manga: manga,
+                isPresented: $showAddSheet
+            ) { volumesPurchased, readingVolume, isComplete in
+                Task {
+                    await viewModel.addToCollection(
+                        manga: manga,
+                        volumesPurchased: volumesPurchased,
+                        currentVolume: readingVolume,
+                        isCompleteCollection: isComplete
+                    )
+                }
+            }
+        }
         .task {
             viewModel.checkCollectionStatus(for: manga)
         }
-    }
-}
-
-#Preview {
-    NavigationStack {
-        MangaDetailView(manga: .preview)
     }
 }

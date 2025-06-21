@@ -29,6 +29,9 @@
 "filter.no_results" = "No se encontraron coincidencias";
 "filter.genre" = "Género";
 
+"button.cancel" = "Cancelar";
+"button.save" = "Guardar";
+
 "mangas.navigation.title" = "Mangas";
 
 "collection.title" = "Tu Colección";
@@ -43,10 +46,17 @@
 "collection.stats.title" = "Estadísticas de Colección";
 "collection.stats.total" = "Mangas Totales";
 "collection.stats.completed" = "Completados";
+"collection.stats.rate" = "Progreso lectura";
 "collection.stats.volumes" = "Tomos Comprados";
 "collection.error.remove" = "Error al eliminar manga";
 "collection.error.update" = "Error al actualizar manga";
 "collection.error.add" = "Error al añadir manga";
+"collection.add.title" = "Añadir a la colección";
+"collection.totalVolumes" = "Volúmenes totales";
+"collection.volumesPurchased" = "Volúmenes comprados";
+"collection.readingVolume" = "Volumen en lectura";
+"collection.isComplete" = "Colección completa";
+
 
 "story & art" = "Historia y Arte";
 "story" = "Historia";

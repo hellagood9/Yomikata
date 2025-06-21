@@ -19,33 +19,20 @@ struct MangaGrid: View {
     }
 
     var body: some View {
-        ScrollView {
-            LazyVGrid(
-                columns: Array(
-                    repeating: GridItem(.flexible()), count: columns),
-                spacing: spacing
-            ) {
-                ForEach(mangas) { manga in
-                    MangaGridCard(manga: manga)
-                        .onAppear {
-                            // Solo ejecutar onLoadMore si está disponible
-                            if let onLoadMore = onLoadMore,
-                                manga.id == mangas.last?.id
-                            {
-                                Task {
-                                    await onLoadMore()
-                                }
-                            }
-                        }
-                }
-            }
-            .padding()
+        GenericGrid(
+            items: mangas,
+            columns: columns,
+            spacing: spacing,
+            onLoadMore: onLoadMore
+        ) { manga in
+            MangaGridCard(manga: manga)
         }
     }
 }
 
 struct MangaGridCard: View {
     let manga: Manga
+
     var body: some View {
         NavigationLink(destination: MangaDetailView(manga: manga)) {
             VStack(alignment: .leading, spacing: 8) {
@@ -57,6 +44,7 @@ struct MangaGridCard: View {
                 )
                 .aspectRatio(2 / 3, contentMode: .fit)
                 .clipShape(RoundedRectangle(cornerRadius: 8))
+
                 // Info compacta
                 VStack(alignment: .leading, spacing: 2) {
                     Text(manga.title)
@@ -64,6 +52,7 @@ struct MangaGridCard: View {
                         .fontWeight(.medium)
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
+
                     if let score = manga.score {
                         HStack(spacing: 2) {
                             Image(systemName: "star.fill")

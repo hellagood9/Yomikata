@@ -2,16 +2,38 @@ import SwiftUI
 
 struct CollectionList: View {
     @Bindable var viewModel: CollectionViewModel
-    
+
+    @State private var selectedManga: MangaCollection?
+
+    private var stats: CollectionStats {
+        CollectionStats(
+            totalMangas: viewModel.collectionMangas.count,
+            completedCollections: viewModel.collectionMangas.filter(
+                \.completeCollection
+            ).count,
+            totalVolumesOwned: viewModel.collectionMangas.flatMap(
+                \.volumesOwned
+            ).count
+        )
+    }
+
     var body: some View {
         List {
+            Section {
+                CollectionStatsSection(stats: stats)
+            }
+
             ForEach(viewModel.collectionMangas) { mangaCollection in
                 CollectionMangaRow(
                     mangaCollection: mangaCollection,
                     onRemove: {
                         Task {
-                            await viewModel.removeFromCollection(mangaCollection)
+                            await viewModel.removeFromCollection(
+                                mangaCollection)
                         }
+                    },
+                    onEdit: {
+                        selectedManga = mangaCollection
                     }
                 )
             }
@@ -25,8 +47,30 @@ struct CollectionList: View {
                     .background(.regularMaterial)
             }
         }
+        .sheet(item: $selectedManga) { manga in
+            AddToCollectionSheet(
+                manga: manga.manga,
+                isPresented: Binding(
+                    get: { selectedManga != nil },
+                    set: { if !$0 { selectedManga = nil } }
+                ),
+                onSave: { volumes, reading, complete in
+                    Task {
+                        await viewModel.updateCollection(
+                            manga: manga.manga,
+                            volumesOwned: Array(1...volumes),
+                            readingVolume: reading,
+                            completeCollection: complete
+                        )
+                    }
+                },
+                initialVolumes: manga.volumesOwned.count,
+                initialReadingVolume: manga.readingVolume,
+                initialComplete: manga.completeCollection
+            )
+        }
     }
-    
+
     // MARK: - Actions
     private func deleteMangas(at offsets: IndexSet) {
         for index in offsets {
@@ -39,22 +83,24 @@ struct CollectionList: View {
 }
 
 #Preview {
-    let viewModel = CollectionViewModel()
-    
-    viewModel.collectionMangas = [
-        MangaCollection(
-            manga: .preview,
-            volumesPurchased: 15,
-            currentVolume: 12,
-            isCompleteCollection: false
-        ),
-        MangaCollection(
-            manga: .preview,
-            volumesPurchased: 42,
-            currentVolume: 42,
-            isCompleteCollection: true
-        )
-    ]
-    
-    return CollectionList(viewModel: viewModel)
+    CollectionList(
+        viewModel: {
+            let viewModel = CollectionViewModel()
+            viewModel.collectionMangas = [
+                MangaCollection(
+                    manga: .preview,
+                    volumesOwned: Array(1...15),
+                    readingVolume: 12,
+                    completeCollection: false
+                ),
+                MangaCollection(
+                    manga: .preview,
+                    volumesOwned: Array(1...42),
+                    readingVolume: 42,
+                    completeCollection: true
+                ),
+            ]
+            return viewModel
+        }()
+    )
 }

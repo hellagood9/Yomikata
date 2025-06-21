@@ -3,82 +3,70 @@ import Foundation
 struct MangaCollection: Codable, Identifiable {
     let id = UUID()
     let manga: Manga
-    var volumesPurchased: Int  // Número de tomos comprados
-    var currentVolume: Int  // Tomo por el que va leyendo
-    var isCompleteCollection: Bool  // Si tiene colección completa
+    var volumesOwned: [Int]              // Ej: [1, 2, 3, 5]
+    var readingVolume: Int?              // Tomo actual de lectura (opcional)
+    var completeCollection: Bool         // Si la colección está completa
     let dateAdded: Date
-
+    
     private enum CodingKeys: String, CodingKey {
-        case manga, volumesPurchased, currentVolume, isCompleteCollection,
-            dateAdded
         // id se excluye porque es generado automáticamente
+        case manga, volumesOwned, readingVolume, completeCollection, dateAdded
     }
 
     // MARK: - Initialization
 
     init(
-        manga: Manga, volumesPurchased: Int = 0, currentVolume: Int = 1,
-        isCompleteCollection: Bool = false
+        manga: Manga,
+        volumesOwned: [Int] = [],
+        readingVolume: Int? = nil,
+        completeCollection: Bool = false
     ) {
         self.manga = manga
-        self.volumesPurchased = volumesPurchased
-        self.currentVolume = currentVolume
-        self.isCompleteCollection = isCompleteCollection
+        self.volumesOwned = volumesOwned
+        self.readingVolume = readingVolume
+        self.completeCollection = completeCollection
         self.dateAdded = Date()
     }
-
+    
     // MARK: - Computed Properties
-
+    
+    var totalVolumes: Int? {
+        return manga.volumes
+    }
+    
     /// Progreso de lectura como porcentaje (0.0 - 1.0)
     var readingProgress: Double {
-        guard let totalVolumes = manga.volumes, totalVolumes > 0 else {
+        guard let total = manga.volumes, let current = readingVolume, total > 0 else {
             return 0.0
         }
-        return Double(currentVolume) / Double(totalVolumes)
+        return Double(current) / Double(total)
     }
-
-    /// Progreso de compra como porcentaje (0.0 - 1.0)
+    
     var purchaseProgress: Double {
-        guard let totalVolumes = manga.volumes, totalVolumes > 0 else {
+        guard let total = manga.volumes, total > 0 else {
             return 0.0
         }
-        return Double(volumesPurchased) / Double(totalVolumes)
+        return Double(volumesOwned.count) / Double(total)
     }
-
-    /// Información de progreso para mostrar en UI
+    
     var progressInfo: String {
-        guard let totalVolumes = manga.volumes else {
+        guard let total = manga.volumes, let current = readingVolume else {
             return "collection.progress.unknown".localized()
         }
-
-        if isCompleteCollection {
+        
+        if completeCollection {
             return "collection.progress.complete".localized()
         }
-
-        return String(
-            format: "collection.progress.format".localized(), currentVolume,
-            totalVolumes)
+        
+        return String(format: "collection.progress.format".localized(), current, total)
     }
 
     /// Información de volúmenes comprados
     var purchaseInfo: String {
-        guard let totalVolumes = manga.volumes else {
+        guard let total = manga.volumes else {
             return "collection.purchase.unknown".localized()
         }
-
-        return String(
-            format: "collection.purchase.format".localized(), volumesPurchased,
-            totalVolumes)
-    }
-}
-
-struct CollectionStats {
-    let totalMangas: Int
-    let completedCollections: Int
-    let totalVolumesOwned: Int
-
-    var completionRate: Double {
-        guard totalMangas > 0 else { return 0.0 }
-        return Double(completedCollections) / Double(totalMangas)
+        
+        return String(format: "collection.purchase.format".localized(), volumesOwned.count, total)
     }
 }
