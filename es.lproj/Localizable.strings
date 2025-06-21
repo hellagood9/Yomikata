@@ -67,6 +67,7 @@
 "detail.chapters" = "Capítulos";
 "detail.score" = "Puntuación";
 "detail.start_date" = "Fecha inicio";
+"detail.publication_period" = "Período";
 "detail.end_date" = "Fecha fin";
 "detail.synopsis" = "Sinopsis";
 "detail.background" = "Trasfondo";

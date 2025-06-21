@@ -22,7 +22,7 @@ struct MangaDetailHeader: View {
                     .multilineTextAlignment(.leading)
 
                 // Authors
-                Text(manga.authors.joinedFullNames(separator: " • "))
+                Text(manga.authors.joinedStringValues(separator: " •", keyPath: \.fullName))
                     .font(.caption)
                     .foregroundColor(.secondary)
 
@@ -38,51 +38,12 @@ struct MangaDetailHeader: View {
                 // Estado de publicación
                 StatusBadge(text: manga.statusDisplay, color: manga.statusColor)
 
-                // Fechas de publicación
-                if let startDateString = manga.startDate,
-                    let startDate = parseDate(from: startDateString)
-                {
-                    HStack {
-                        Text(
-                            formatPublicationDates(
-                                startDate: startDate,
-                                endDateString: manga.endDate
-                            )
-                        )
-                        .font(.caption)
-                        .foregroundColor(.secondary)
-                    }
-                }
-
                 Spacer()
             }
             Spacer()
         }
     }
 
-    private func parseDate(from dateString: String) -> Date? {
-        let formatter = ISO8601DateFormatter()
-        return formatter.date(from: dateString)
-    }
-
-    private func formatPublicationDates(startDate: Date, endDateString: String?)
-        -> String
-    {
-        let dateFormatter = DateFormatter()
-        dateFormatter.dateFormat = "MMM yyyy"
-        dateFormatter.locale = Locale.current  // Usa el idioma del dispositivo
-
-        let startString = dateFormatter.string(from: startDate)
-
-        if let endDateString = endDateString,
-            let endDate = parseDate(from: endDateString)
-        {
-            let endString = dateFormatter.string(from: endDate)
-            return "\(startString) - \(endString)"
-        } else {
-            return "\(startString) - " + "general.na".localized()
-        }
-    }
 }
 
 #Preview {

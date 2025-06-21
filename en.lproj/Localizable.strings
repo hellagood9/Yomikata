@@ -68,6 +68,7 @@
 "detail.score" = "Score";
 "detail.start_date" = "Start Date";
 "detail.end_date" = "End Date";
+"detail.publication_period" = "Publication Period";
 "detail.synopsis" = "Synopsis";
 "detail.background" = "Background";
 "detail.demographics" = "Demographics";
