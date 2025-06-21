@@ -9,8 +9,17 @@ final class MangaListViewModel {
     var isLoadingMore = false
     var errorMessage: String?
     var searchText = ""
-    private var searchTask: Task<Void, Never>?
+    var selectedGenre: String = ""
     var isGridView = false
+    private var searchTask: Task<Void, Never>?
+
+    let availableGenres = [
+        "Action", "Adventure", "Award Winning", "Drama", "Fantasy",
+        "Horror", "Supernatural", "Mystery", "Slice of Life", "Comedy",
+        "Sci-Fi", "Suspense", "Sports", "Ecchi", "Romance",
+        "Girls Love", "Boys Love", "Gourmet", "Erotica", "Hentai",
+        "Avant Garde",
+    ]
 
     // MARK: - Dependencies
     private let apiService = APIService()
@@ -83,35 +92,55 @@ final class MangaListViewModel {
     }
 
     /// Busca mangas por su titulo
-        func searchMangas() async {
-            // Cancelar búsqueda anterior
-            searchTask?.cancel()
-    
-            // Nueva tarea con debounce
-            searchTask = Task {
-                try? await Task.sleep(nanoseconds: 300_000_000)  // 0.3 segundos
-    
-                guard !Task.isCancelled else { return }
-    
-                if searchText.isEmpty {
-                    await loadMangas()
-                } else {
-                    isLoading = true
-                    defer { isLoading = false }
-    
-                    do {
-                        let response = try await apiService.searchMangasContains(
-                            searchText)
-                        guard !Task.isCancelled else { return }
-                        mangas = response.items
-                        errorMessage = nil
-                    } catch {
-                        guard !Task.isCancelled else { return }
-                        errorMessage = error.localizedDescription
-                    }
+    func searchMangas() async {
+        // Cancelar búsqueda anterior
+        searchTask?.cancel()
+
+        // Nueva tarea con debounce
+        searchTask = Task {
+            try? await Task.sleep(nanoseconds: 300_000_000)  // 0.3 segundos
+
+            guard !Task.isCancelled else { return }
+
+            if searchText.isEmpty {
+                await loadMangas()
+            } else {
+                isLoading = true
+                defer { isLoading = false }
+
+                do {
+                    let response = try await apiService.searchMangasContains(
+                        searchText)
+                    guard !Task.isCancelled else { return }
+                    mangas = response.items
+                    errorMessage = nil
+                } catch {
+                    guard !Task.isCancelled else { return }
+                    errorMessage = error.localizedDescription
                 }
             }
         }
+    }
+
+    /// Filtra por género
+    func filterByGenre(_ genre: String) async {
+        selectedGenre = genre
+
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            if genre.isEmpty {
+                await loadMangas()
+            } else {
+                let response = try await apiService.getMangasByGenre(genre)
+                mangas = response.items
+            }
+            errorMessage = nil
+        } catch {
+            errorMessage = error.localizedDescription
+        }
+    }
 
     // MARK: - Computed Properties
 

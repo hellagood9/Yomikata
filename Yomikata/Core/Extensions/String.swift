@@ -6,3 +6,10 @@ extension String {
         return value == self ? (fallback ?? self) : value
     }
 }
+
+extension String {
+    var localizedGenre: String {
+        let key = "genre.\(self.lowercased().replacingOccurrences(of: " ", with: "_"))"
+        return key.localized(fallback: self)
+    }
+}

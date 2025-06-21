@@ -22,6 +22,26 @@ struct MangaListView: View {
                 }
             }
             .toolbar {
+                ToolbarItem(placement: .topBarLeading) {
+                    Menu("filter.genre".localized(fallback: "Genre")) {
+                        Button("filter.all".localized(fallback: "All")) {
+                            Task {
+                                await viewModel.filterByGenre("")
+                            }
+                        }
+
+                        ForEach(viewModel.availableGenres, id: \.self) {
+                            genre in
+                            Button(genre.localizedGenre) {
+                                Task {
+                                    await viewModel.filterByGenre(genre)
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            .toolbar {
                 ToolbarItem(placement: .topBarTrailing) {
                     Button(action: {
                         viewModel.isGridView.toggle()
