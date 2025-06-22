@@ -1,4 +1,4 @@
-struct Author: Codable, Identifiable, Hashable {
+struct Author: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let firstName: String
     let lastName: String
@@ -22,7 +22,7 @@ struct Author: Codable, Identifiable, Hashable {
     }
 }
 
-enum AuthorRole: String, CaseIterable {
+enum AuthorRole: String, CaseIterable, Sendable {
     case storyAndArt = "story & art"
     case story = "story"
     case art = "art"

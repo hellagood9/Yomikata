@@ -1,6 +1,6 @@
 import Foundation
 
-struct Demographic: Codable, Identifiable, Hashable {
+struct Demographic: Codable, Identifiable, Hashable, Sendable {
     let id: String
     let demographic: String
 

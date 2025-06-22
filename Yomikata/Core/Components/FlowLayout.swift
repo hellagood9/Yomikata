@@ -14,7 +14,7 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
             GeometryReader { geometry in
                 self.generateWrappedRows(width: geometry.size.width)
                     .background(HeightReader(height: $height))
-                    .animation(.easeInOut, value: sizes) // animación suave
+                    .animation(.easeInOut, value: sizes)
             }
         }
         .frame(height: height)
@@ -63,12 +63,18 @@ struct FlowLayout<Data: RandomAccessCollection, Content: View>: View where Data.
                 }
             }
         }
-        .onPreferenceChange(SizePreferenceKey.self) { self.sizes = $0 }
+        .onPreferenceChange(SizePreferenceKey.self) { newSizes in
+            Task { @MainActor in
+                self.sizes = newSizes
+            }
+        }
     }
 }
 
 private struct SizePreferenceKey: PreferenceKey {
-    static var defaultValue: [String: CGSize] = [:]
+    // Para evitar el warning de concurrency
+    nonisolated(unsafe) static var defaultValue: [String: CGSize] = [:]
+    
     static func reduce(value: inout [String: CGSize], nextValue: () -> [String: CGSize]) {
         value.merge(nextValue(), uniquingKeysWith: { $1 })
     }
@@ -83,8 +89,8 @@ private struct HeightReader: View {
                 .onAppear {
                     height = geometry.size.height
                 }
-                .onChange(of: geometry.size.height) {
-                    height = geometry.size.height
+                .onChange(of: geometry.size.height) { _, newHeight in
+                    height = newHeight
                 }
         }
     }

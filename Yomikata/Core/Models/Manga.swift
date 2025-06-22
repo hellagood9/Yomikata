@@ -1,7 +1,7 @@
 import Foundation
 import SwiftUI
 
-struct Manga: Codable, Identifiable, Hashable {
+struct Manga: Codable, Identifiable, Hashable, Sendable {
     let id: Int
     let title: String
     let titleJapanese: String?
@@ -127,7 +127,7 @@ struct Manga: Codable, Identifiable, Hashable {
 
 }
 
-enum MangaStatus: String, CaseIterable {
+enum MangaStatus: String, CaseIterable, Sendable {
     case finished = "finished"
     case currentlyPublishing = "currently_publishing"
     case onHiatus = "on_hiatus"
