@@ -25,9 +25,17 @@
 "search.results.generic" = "Resultados de búsqueda";
 "search.try_different" = "Prueba con otro término de búsqueda";
 
-"filter.all" = "Todos";
-"filter.no_results" = "No se encontraron coincidencias";
-"filter.genre" = "Género";
+"filter.title" = "Filtros";
+"filter.genres" = "Géneros";
+"filter.themes" = "Temas";
+"filter.demographics" = "Demografía";
+"filter.authors" = "Autores";
+"filter.reset" = "Restablecer";
+"filter.close" = "Cerrar";
+"filter.apply" = "Aplicar filtros";
+"filter.clear" = "Limpiar";
+"filter.loading" = "Cargando...";
+"filter.single_only" = "Solo se puede activar un filtro a la vez. Selecciona otro filtro para reemplazar el actual.";
 
 "button.cancel" = "Cancelar";
 "button.save" = "Guardar";
@@ -57,16 +65,15 @@
 "collection.readingVolume" = "Volumen en lectura";
 "collection.isComplete" = "Colección completa";
 
-
 "story & art" = "Historia y Arte";
 "story" = "Historia";
 "art" = "Arte";
 
-"shounen" = "(Chicos jóvenes)";
-"shoujo" = "(Chicas jóvenes)";
-"seinen" = "(Adultos)";
-"josei" = "(Mujeres adultas)";
-"kids" = "(Niños)";
+"demographic.shounen" = "Shounen (Chicos jóvenes)";
+"demographic.shoujo" = "Shoujo (Chicas jóvenes)";
+"demographic.seinen" = "Seinen (Adultos)";
+"demographic.josei" = "Josei (Mujeres adultas)";
+"demographic.kodomomuke" = "Kodomomuke (Niños)";
 
 "status.finished" = "Finalizado";
 "status.currently_publishing" = "En publicación";

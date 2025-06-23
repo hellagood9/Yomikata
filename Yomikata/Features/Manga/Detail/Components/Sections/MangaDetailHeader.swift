@@ -22,7 +22,7 @@ struct MangaDetailHeader: View {
                     .multilineTextAlignment(.leading)
 
                 // Authors
-                Text(manga.authors.joinedStringValues(separator: " •", keyPath: \.fullName))
+                Text(manga.authors.joinedStringValues(separator: " • ", keyPath: \.fullName))
                     .font(.caption)
                     .foregroundColor(.secondary)
 

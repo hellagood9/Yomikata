@@ -11,31 +11,26 @@ struct MangaRow: View {
                     assetName: manga.assetImageName
                 )
                 .frame(width: 50, height: 70)
-                
+
                 VStack(alignment: .leading, spacing: 4) {
                     Text(manga.displayTitle)
                         .font(.headline)
                         .lineLimit(2)
-                    
+
                     Text(manga.displayOriginalTitle)
                         .font(.footnote)
                         .lineLimit(2)
                         .foregroundColor(.secondary)
-                    
+
                     Text(manga.displayScore)
                         .font(.caption)
-                        .foregroundColor(.secondary)
-                    
-                    Text(manga.statusDisplay)
-                        .font(.caption2)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.primary)
                 }
-                
                 Spacer()
             }
             .padding(.vertical, 4)
         }
-        
+
     }
 }
 

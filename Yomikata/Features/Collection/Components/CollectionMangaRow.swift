@@ -32,8 +32,7 @@ struct CollectionMangaRow: View {
             VStack(spacing: 8) {
                 Button(action: onEdit) {
                     Image(systemName: "pencil")
-                        .font(.title3)
-                        .foregroundColor(.blue)
+                        .foregroundColor(.secondary)
                         .frame(width: 32, height: 32)
                         .background(Color.gray.opacity(0.1))
                         .clipShape(Circle())
@@ -41,7 +40,6 @@ struct CollectionMangaRow: View {
 
                 Button(action: onRemove) {
                     Image(systemName: "bookmark.fill")
-                        .font(.title3)
                         .foregroundColor(.accentColor)
                         .frame(width: 32, height: 32)
                         .background(Color.accentColor.opacity(0.1))

@@ -50,7 +50,6 @@ struct CollectionStatsSection: View {
                     icon: "percent"
                 )
             }
-            .background(Color(.secondarySystemGroupedBackground))
             .cornerRadius(12)
         }
     }

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MangaListView: View {
     @State private var viewModel = MangaListViewModel()
+    @State private var showFilters = false
 
     var body: some View {
         NavigationStack {
@@ -22,50 +23,54 @@ struct MangaListView: View {
                 }
             }
             .toolbar {
-                ToolbarItem(placement: .topBarLeading) {
-                    Menu(
-                        viewModel.selectedGenre.isEmpty
-                            ? "filter.genre".localized()
-                            : viewModel.selectedGenre.localizedGenre
-                    ) {
-                        Button("filter.all".localized()) {
-                            Task {
-                                viewModel.selectedGenre = ""
-                                await viewModel.loadMangas()
-                            }
-                        }
+                ToolbarItem(placement: .topBarTrailing) {
+                    HStack(spacing: 12) {
+                        // Filtros Button
+                        Button(action: {
+                            showFilters = true
+                        }) {
+                            ZStack {
+                                Image(systemName: "slider.vertical.3")
+                                    .font(.title3)
 
-                        ForEach(viewModel.availableGenres, id: \.self) {
-                            genre in
-                            Button(genre.localizedGenre) {
-                                Task {
-                                    await viewModel.filterByGenre(genre)
+                                // Badge para filtros activos
+                                if viewModel.hasActiveFilter {
+                                    Text("\(viewModel.activeFilterCount)")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .frame(width: 16, height: 16)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                        .offset(x: 8, y: -8)
                                 }
                             }
                         }
+
+                        // Grid/List Toggle
+                        Button(action: {
+                            viewModel.isGridView.toggle()
+                        }) {
+                            Image(
+                                systemName: viewModel.isGridView
+                                    ? "list.bullet" : "square.grid.2x2"
+                            )
+                            .font(.title3)
+                        }
                     }
                 }
             }
-            .toolbar {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button(action: {
-                        viewModel.isGridView.toggle()
-                    }) {
-                        Image(
-                            systemName: viewModel.isGridView
-                                ? "list.bullet" : "square.grid.2x2"
-                        )
-                        .font(.title3)
-                    }
-                }
-            }
-            .animation(.easeInOut(duration: 0.2), value: viewModel.mangas)  // Suaviza el "tirón" al cargar + mangas
+            .animation(.easeInOut(duration: 0.2), value: viewModel.mangas)
             .refreshable {
                 await viewModel.refreshMangas()
             }
             .task {
                 await viewModel.loadMangasIfNeeded()
                 await viewModel.loadGenres()
+            }
+            .sheet(isPresented: $showFilters) {
+                SmartFiltersView(
+                    isPresented: $showFilters, viewModel: viewModel)
             }
             .overlay {
                 // Loading state inicial
