@@ -6,7 +6,7 @@ struct MangaDetailCategories: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             if !manga.demographics.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 16) {
                     Text("detail.demographics".localized())
                         .font(.headline)
                         .fontWeight(.semibold)
@@ -22,7 +22,7 @@ struct MangaDetailCategories: View {
             }
 
             if !manga.genres.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 16) {
                     Text("detail.genres".localized())
                         .font(.headline)
                         .fontWeight(.semibold)
@@ -38,7 +38,7 @@ struct MangaDetailCategories: View {
             }
 
             if !manga.themes.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
+                VStack(alignment: .leading, spacing: 16) {
                     Text("detail.themes".localized())
                         .font(.headline)
                         .fontWeight(.semibold)
@@ -53,7 +53,7 @@ struct MangaDetailCategories: View {
                 }
             }
 
-            VStack(alignment: .leading, spacing: 8) {
+            VStack(alignment: .leading, spacing: 16) {
                 Text("Authors")
                     .font(.headline)
                     .fontWeight(.semibold)

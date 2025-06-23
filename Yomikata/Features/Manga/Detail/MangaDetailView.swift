@@ -8,14 +8,20 @@ struct MangaDetailView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 20) {
+                // Header SIN padding - va edge to edge
                 MangaDetailHeader(manga: manga)
-                MangaDetailInfo(manga: manga)
-                MangaDetailSynopsis(manga: manga)
-                MangaDetailCategories(manga: manga)
-                Spacer(minLength: 100)
+                
+                // Resto del contenido CON padding
+                VStack(alignment: .leading, spacing: 20) {
+                    MangaDetailInfo(manga: manga)
+                    MangaDetailSynopsis(manga: manga)
+                    MangaDetailCategories(manga: manga)
+                    Spacer(minLength: 100)
+                }
+                .padding() // Solo el contenido de abajo tiene padding
             }
-            .padding()
         }
+        .ignoresSafeArea(.container, edges: .top) // ¡CLAVE! Para que el header vaya hasta arriba
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {

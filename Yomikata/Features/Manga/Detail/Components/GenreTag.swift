@@ -2,15 +2,29 @@ import SwiftUI
 
 struct GenreTag: View {
     let genre: Genre
-
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
         Text(genre.displayName)
             .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.blue.opacity(0.1))
-            .foregroundColor(.blue)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .fontWeight(.medium)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(backgroundColorForColorScheme)
+            .foregroundColor(textColorForColorScheme)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+    
+    private var backgroundColorForColorScheme: Color {
+        return colorScheme == .dark
+        ? Color.blue.opacity(0.3)
+        : Color.blue.opacity(0.15)
+    }
+    
+    private var textColorForColorScheme: Color {
+        return colorScheme == .dark
+        ? Color.blue.opacity(0.9)
+        : Color.blue
     }
 }
 

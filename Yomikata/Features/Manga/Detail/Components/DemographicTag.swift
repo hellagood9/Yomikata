@@ -2,16 +2,30 @@ import SwiftUI
 
 struct DemographicTag: View {
     let demographic: String
+    @Environment(\.colorScheme) var colorScheme
     
     var body: some View {
         Text(demographic)
             .font(.caption)
             .fontWeight(.medium)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(demographicColor.opacity(0.2))
-            .foregroundColor(demographicColor)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(backgroundColorForColorScheme)
+            .foregroundColor(textColorForColorScheme)
             .clipShape(Capsule())
+    }
+    
+    private var backgroundColorForColorScheme: Color {
+        let baseColor = demographicColor
+        return colorScheme == .dark
+        ? baseColor.opacity(0.3)
+        : baseColor.opacity(0.15)
+    }
+    
+    private var textColorForColorScheme: Color {
+        return colorScheme == .dark
+        ? demographicColor.opacity(0.9)
+        : demographicColor
     }
     
     private var demographicColor: Color {
@@ -21,11 +35,11 @@ struct DemographicTag: View {
         case "shoujo":
             return .pink
         case "seinen":
-            return .purple
+            return .orange
         case "josei":
             return .teal
         default:
-            return .gray
+            return .secondary
         }
     }
 }

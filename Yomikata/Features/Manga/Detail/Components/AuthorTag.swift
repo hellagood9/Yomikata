@@ -3,23 +3,35 @@ import SwiftUI
 struct AuthorTag: View {
     let author: Author
     let showRole: Bool
-
+    @Environment(\.colorScheme) var colorScheme
+    
     var body: some View {
-        let text =
-            showRole
-            ? "\(author.fullName) (\(author.displayRole))"
-            : author.fullName
-
+        let text = showRole
+        ? "\(author.fullName) (\(author.displayRole))"
+        : author.fullName
+        
         Text(text)
             .font(.caption)
-            .padding(.horizontal, 8)
-            .padding(.vertical, 4)
-            .background(Color.gray.opacity(0.1))
-            .foregroundColor(.secondary)
-            .clipShape(RoundedRectangle(cornerRadius: 6))
+            .fontWeight(.medium)
+            .padding(.horizontal, 10)
+            .padding(.vertical, 5)
+            .background(backgroundColorForColorScheme)
+            .foregroundColor(textColorForColorScheme)
+            .clipShape(RoundedRectangle(cornerRadius: 8))
+    }
+    
+    private var backgroundColorForColorScheme: Color {
+        return colorScheme == .dark
+        ? Color.secondary.opacity(0.3)
+        : Color.secondary.opacity(0.15)
+    }
+    
+    private var textColorForColorScheme: Color {
+        return colorScheme == .dark
+        ? Color.secondary
+        : Color.primary
     }
 }
-
 #Preview {
     let mockAuthor = Author(
         id: "1",

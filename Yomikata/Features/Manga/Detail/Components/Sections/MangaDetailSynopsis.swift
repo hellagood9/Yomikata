@@ -4,7 +4,7 @@ struct MangaDetailSynopsis: View {
     let manga: Manga
     
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
+        VStack(alignment: .leading, spacing: 16) {
             Text("detail.synopsis".localized())
                 .font(.headline)
                 .fontWeight(.semibold)
