@@ -58,7 +58,6 @@ struct CollectionMangaRow: View {
             }
             .buttonStyle(.plain)
         }
-        .padding(.vertical, 8)
     }
 }
 

@@ -4,7 +4,7 @@ struct ContentView: View {
     @State private var apiService = APIService()
 
     var body: some View {
-        MainTabView()
+        SplashScreenView()
     }
 
 }
