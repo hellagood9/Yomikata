@@ -5,37 +5,49 @@ struct MangaRow: View {
 
     var body: some View {
         NavigationLink(destination: MangaDetailView(manga: manga)) {
-            HStack {
+            HStack(spacing: 16) {
                 MangaMainPicture(
                     url: manga.cleanImageURL,
                     assetName: manga.assetImageName
                 )
-                .frame(width: 50, height: 70)
+                .aspectRatio(2 / 3, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: 6))
+                .frame(width: 65, height: 85)
+                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
 
                 VStack(alignment: .leading, spacing: 4) {
                     Text(manga.displayTitle)
                         .font(.headline)
+                        .fontWeight(.medium)
                         .lineLimit(2)
 
                     Text(manga.displayOriginalTitle)
                         .font(.footnote)
                         .lineLimit(2)
                         .foregroundColor(.secondary)
+                        .padding(.bottom, 8)
 
-                    Text(manga.displayScore)
-                        .font(.caption)
-                        .foregroundColor(.primary)
+                    // Rating con estrella
+                    HStack(spacing: 4) {
+                        Image(systemName: "star.fill")
+                            .foregroundColor(.yellow)
+                            .font(.caption)
+                        Text(manga.displayScore)
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .foregroundColor(.primary)
+                    }
                 }
                 Spacer()
             }
-            .padding(.vertical, 4)
         }
-
     }
 }
 
 #Preview {
     List {
-        MangaRow(manga: .preview)
+        ForEach(Manga.previews) { manga in
+            MangaRow(manga: manga)
+        }
     }
 }

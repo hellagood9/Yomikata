@@ -36,34 +36,37 @@ struct MangaGridCard: View {
     var body: some View {
         NavigationLink(destination: MangaDetailView(manga: manga)) {
             VStack(alignment: .leading, spacing: 8) {
-                // Imagen más grande para grid
                 MangaMainPicture(
                     url: manga.cleanImageURL,
                     assetName: manga.assetImageName,
                     iconSize: 48
                 )
                 .aspectRatio(2 / 3, contentMode: .fit)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: 6))  // Mismo radio que el List
+                .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)  // Misma sombra que el List
 
-                // Info compacta
-                VStack(alignment: .leading, spacing: 2) {
+                VStack(alignment: .leading, spacing: 4) {
                     Text(manga.title)
-                        .font(.caption)
-                        .fontWeight(.medium)
+                        .font(.headline)
+                        .fontWeight(.medium)  // Mismo weight que el List
                         .lineLimit(2)
                         .multilineTextAlignment(.leading)
+                        .foregroundColor(.primary)
 
+                    // RATING
                     if let score = manga.score {
-                        HStack(spacing: 2) {
+                        HStack(spacing: 4) {
                             Image(systemName: "star.fill")
-                                .font(.caption2)
+                                .font(.caption)
                                 .foregroundColor(.yellow)
                             Text(String(format: "%.1f", score))
-                                .font(.caption2)
-                                .foregroundColor(.secondary)
+                                .font(.caption)
+                                .fontWeight(.medium)
+                                .foregroundColor(.primary)
                         }
                     }
                 }
+
                 Spacer(minLength: 0)
             }
         }
@@ -71,10 +74,38 @@ struct MangaGridCard: View {
     }
 }
 
-#Preview {
-    LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())]) {
-        MangaGridCard(manga: .preview)
-        MangaGridCard(manga: .preview)
+#Preview("Grid Dark") {
+    ScrollView {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+            ],
+            spacing: 16
+        ) {
+            ForEach(0..<6) { _ in
+                MangaGridCard(manga: .preview)
+            }
+        }
+        .padding()
     }
-    .padding()
+    .preferredColorScheme(.dark)
+}
+
+#Preview("Grid Light") {
+    ScrollView {
+        LazyVGrid(
+            columns: [
+                GridItem(.flexible()),
+                GridItem(.flexible()),
+            ],
+            spacing: 16
+        ) {
+            ForEach(0..<6) { _ in
+                MangaGridCard(manga: .preview)
+            }
+        }
+        .padding()
+    }
+    .preferredColorScheme(.light)
 }

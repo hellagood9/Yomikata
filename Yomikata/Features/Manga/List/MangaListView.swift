@@ -33,16 +33,16 @@ struct MangaListView: View {
                                 Image(systemName: "slider.vertical.3")
                                     .font(.title3)
 
-                                // Badge para filtros activos
+                                // Notification Badge para filtros activos
                                 if viewModel.hasActiveFilter {
                                     Text("\(viewModel.activeFilterCount)")
                                         .font(.caption2)
                                         .fontWeight(.bold)
                                         .foregroundColor(.white)
                                         .frame(width: 16, height: 16)
-                                        .background(Color.red)
+                                        .background(Color.yellow)
                                         .clipShape(Circle())
-                                        .offset(x: 8, y: -8)
+                                        .offset(x: 12, y: -12)
                                 }
                             }
                         }
@@ -66,7 +66,6 @@ struct MangaListView: View {
             }
             .task {
                 await viewModel.loadMangasIfNeeded()
-                await viewModel.loadGenres()
             }
             .sheet(isPresented: $showFilters) {
                 SmartFiltersView(
