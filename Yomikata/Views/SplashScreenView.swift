@@ -16,15 +16,15 @@ struct SplashScreenView: View {
                 brandColor
                     .ignoresSafeArea()
                 
-                VStack(spacing: 16) {
+                VStack(spacing: 4) {
                     Image("yomikata-logo")
                         .resizable()
                         .aspectRatio(contentMode: .fit)
-                        .frame(width: 120, height: 120)
+                        .frame(width: 160, height: 160)
                     
                     VStack(spacing: 8) {
                         Text("YOMIKATA")
-                            .font(.system(size: 32, weight: .bold, design: .monospaced))
+                            .font(.system(size: 38, weight: .bold, design: .monospaced))
                             .foregroundColor(.white)
                             .opacity(logoOpacity)
                         
@@ -45,6 +45,7 @@ struct SplashScreenView: View {
                             .foregroundColor(.white.opacity(0.8))
                     }
                     .opacity(logoOpacity)
+                    .padding(.top, 24)
                 }
             }
             .onAppear {
