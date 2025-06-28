@@ -6,7 +6,7 @@ struct MangaDetailInfo: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("detail.information".localized())
-                .font(.headline)
+                .font(.title3)
                 .fontWeight(.semibold)
 
             LazyVGrid(

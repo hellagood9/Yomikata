@@ -4,15 +4,13 @@ struct DemographicTag: View {
     let demographic: String
     @Environment(\.colorScheme) var colorScheme
     
-    var body: some View {
-        Text(demographic)
-            .font(.caption)
-            .fontWeight(.medium)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(backgroundColorForColorScheme)
-            .foregroundColor(textColorForColorScheme)
-            .clipShape(Capsule())
+    var body: some View {  
+        Tag(
+            text: demographic,
+            backgroundColor: backgroundColorForColorScheme,
+            foregroundColor: textColorForColorScheme,
+            clipShape: Capsule()
+        )
     }
     
     private var backgroundColorForColorScheme: Color {

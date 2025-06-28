@@ -14,12 +14,16 @@ struct MangaDetailHeader: View {
             .aspectRatio(contentMode: .fill)
             .frame(height: 380)
             .clipped()
-            .opacity(0.3)
+            .opacity(0.4)
             .overlay(
                 // Degradado que se adapta al color scheme
                 LinearGradient(
                     colors: [
-                        Color.clear,  // Transparente arriba
+                        (colorScheme == .dark ? Color.black : Color.white)
+                            .opacity(0.8),
+                        (colorScheme == .dark ? Color.black : Color.white)
+                            .opacity(0.4),
+//                        Color.clear,  // Transparente arriba
                         Color.clear,  // Transparente en el medio
                         // Adapta según el modo: negro para dark, blanco para light
                         (colorScheme == .dark ? Color.black : Color.white)
@@ -85,7 +89,6 @@ struct MangaDetailHeader: View {
                 Spacer()
             }
             .padding(.top, 100)
-            .padding(.bottom, 24)
         }
         .frame(height: 350)
     }

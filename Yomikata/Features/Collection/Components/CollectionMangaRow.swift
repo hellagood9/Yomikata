@@ -11,9 +11,10 @@ struct CollectionMangaRow: View {
                 url: mangaCollection.manga.cleanImageURL,
                 assetName: mangaCollection.manga.assetImageName
             )
-            .frame(width: 55, height: 75)  // Mismo tamaño que MangaRow
+            .aspectRatio(2 / 3, contentMode: .fit)
             .clipShape(RoundedRectangle(cornerRadius: 6))
-            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)  // Misma sombra que MangaRow
+            .frame(width: 65, height: 85)
+            .shadow(color: .black.opacity(0.1), radius: 2, x: 0, y: 1)
 
             VStack(alignment: .leading, spacing: 4) {
                 Text(mangaCollection.manga.title)
@@ -38,25 +39,20 @@ struct CollectionMangaRow: View {
             VStack(spacing: 8) {
                 // Edit button
                 Button(action: onEdit) {
-                    Image(systemName: "pencil")
+                    Image(systemName: "square.and.pencil")
                         .font(.system(size: 14, weight: .medium))
                         .foregroundColor(.secondary)
                         .frame(width: 32, height: 32)
                         .background(Color.secondary.opacity(0.1))
                         .clipShape(Circle())
                 }
-
-                // Remove button (bookmark filled = in collection)
-                Button(action: onRemove) {
-                    Image(systemName: "bookmark.fill")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundColor(.accentColor)
-                        .frame(width: 32, height: 32)
-                        .background(Color.accentColor.opacity(0.1))
-                        .clipShape(Circle())
-                }
             }
             .buttonStyle(.plain)
+        }
+        .swipeActions(edge: .trailing) {
+            Button(role: .destructive, action: onRemove) {
+                Label("Remove", systemImage: "bookmark.fill")
+            }
         }
     }
 }

@@ -5,14 +5,11 @@ struct GenreTag: View {
     @Environment(\.colorScheme) var colorScheme
 
     var body: some View {
-        Text(genre.displayName)
-            .font(.caption)
-            .fontWeight(.medium)
-            .padding(.horizontal, 10)
-            .padding(.vertical, 5)
-            .background(backgroundColorForColorScheme)
-            .foregroundColor(textColorForColorScheme)
-            .clipShape(RoundedRectangle(cornerRadius: 8))
+        Tag(
+            text: genre.displayName,
+            backgroundColor: backgroundColorForColorScheme,
+            foregroundColor: textColorForColorScheme
+        )
     }
 
     private var backgroundColorForColorScheme: Color {
