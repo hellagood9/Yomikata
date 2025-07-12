@@ -2,7 +2,7 @@ import SwiftUI
 
 struct CollectionEmptyState: View {
     var body: some View {
-        VStack {
+        VStack(alignment: .center, spacing: 8) {
             Image(systemName: "bookmark")
                 .font(.largeTitle)
                 .foregroundColor(.gray)
