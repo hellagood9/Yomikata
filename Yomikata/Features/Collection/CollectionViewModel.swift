@@ -41,6 +41,17 @@ final class CollectionViewModel {
         print("✅ Loaded collection: \(collectionMangas.count) mangas")
     }
 
+    func clearCollection() async {
+        let success = collectionService.clearCollection()
+        if success {
+            collectionMangas.removeAll()
+            print("✅ Collection cleared successfully")
+        } else {
+            errorMessage = "collection.error.clear".localized()
+            print("❌ Failed to clear collection")
+        }
+    }
+
     /// Elimina un manga de la colección
     func removeFromCollection(_ collectionManga: MangaCollection) async {
         let success = collectionService.removeFromCollection(
