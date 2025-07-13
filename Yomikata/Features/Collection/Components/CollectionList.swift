@@ -54,17 +54,17 @@ struct CollectionList: View {
                     get: { selectedManga != nil },
                     set: { if !$0 { selectedManga = nil } }
                 ),
-                onSave: { volumes, reading, complete in
+                onSave: { ownedVolumes, readingVolume, complete in
                     Task {
                         await viewModel.updateCollection(
                             manga: manga.manga,
-                            volumesOwned: Array(1...volumes),
-                            readingVolume: reading,
+                            volumesOwned: ownedVolumes,
+                            readingVolume: readingVolume,
                             completeCollection: complete
                         )
                     }
                 },
-                initialVolumes: manga.volumesOwned.count,
+                initialVolumes: manga.volumesOwned,
                 initialReadingVolume: manga.readingVolume,
                 initialComplete: manga.completeCollection
             )

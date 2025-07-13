@@ -16,15 +16,6 @@ struct SmartFiltersView: View {
         NavigationView {
             ScrollView {
                 VStack(alignment: .leading, spacing: 24) {
-
-                    // Info banner si solo permite 1 filtro
-                    if !supportsMultipleFilters && totalSelectedFilters > 0 {
-                        InfoBanner(
-                            message:
-                                "filter.single_only".localized()
-                        )
-                    }
-
                     // Géneros
                     SmartFilterSection(
                         title: "filter.genres".localized(),

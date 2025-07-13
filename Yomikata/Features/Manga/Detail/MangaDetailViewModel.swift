@@ -4,22 +4,22 @@ import Foundation
 @Observable
 class MangaDetailViewModel {
     private(set) var isInCollection = false
-    
+
     // MARK: - Dependencies
     private let collectionService: CollectionService
-    
+
     // MARK: - Initialization
     init(collectionService: CollectionService = CollectionService()) {
         self.collectionService = collectionService
     }
-    
+
     // MARK: - Public Interface
-    
+
     /// Verifica el estado inicial de un manga en la colección
     func checkCollectionStatus(for manga: Manga) {
         isInCollection = collectionService.isInCollection(manga)
     }
-    
+
     func removeFromCollection(_ manga: Manga) async {
         let success = collectionService.removeFromCollection(manga)
         if success {
@@ -27,20 +27,20 @@ class MangaDetailViewModel {
             print("✅ Removed \(manga.title) from collection")
         }
     }
-    
+
     func addToCollection(
         manga: Manga,
-        volumesPurchased: Int,
+        volumesOwned: [Int],
         currentVolume: Int?,
         isCompleteCollection: Bool
     ) async {
         let item = MangaCollection(
             manga: manga,
-            volumesOwned: Array(1...volumesPurchased),
+            volumesOwned: volumesOwned,
             readingVolume: currentVolume,
             completeCollection: isCompleteCollection
         )
-        
+
         let success = collectionService.addToCollection(item)
         if success {
             isInCollection = true

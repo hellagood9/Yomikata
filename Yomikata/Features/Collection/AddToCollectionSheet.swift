@@ -3,14 +3,14 @@ import SwiftUI
 struct AddToCollectionSheet: View {
     let manga: Manga
     @Binding var isPresented: Bool
-    var onSave: (Int, Int?, Bool) -> Void
+    var onSave: ([Int], Int?, Bool) -> Void
 
-    var initialVolumes: Int? = nil
+    var initialVolumes: [Int]? = nil
     var initialReadingVolume: Int? = nil
     var initialComplete: Bool? = nil
 
     @State private var totalVolumes: Int = 1
-    @State private var volumesPurchased: Int = 0
+    @State private var ownedVolumes: [Int] = []
     @State private var currentVolume: Int = 1
     @State private var isCompleteCollection = false
 
@@ -26,17 +26,48 @@ struct AddToCollectionSheet: View {
 
                 Section(header: Text("collection.volumesPurchased".localized()))
                 {
-                    Stepper(
-                        value: $volumesPurchased, in: 0...max(totalVolumes, 1)
-                    ) {
-                        Text("\(volumesPurchased)")
+                    ForEach(chunkedVolumes.indices, id: \.self) { index in
+                        DisclosureGroup(
+                            "collection.volumes".localized()
+                                + " \(chunkedVolumes[index].min()!)-\(chunkedVolumes[index].max()!)"
+                        ) {
+                            ForEach(chunkedVolumes[index], id: \.self) {
+                                volume in
+                                Toggle(
+                                    "collection.volume".localized()
+                                        + " \(volume)",
+                                    isOn: Binding(
+                                        get: { ownedVolumes.contains(volume) },
+                                        set: { isOwned in
+                                            if isOwned {
+                                                ownedVolumes.append(volume)
+                                            } else {
+                                                ownedVolumes.removeAll {
+                                                    $0 == volume
+                                                }
+                                            }
+                                        }
+                                    ))
+                            }
+                        }
+                    }
+                    Button("collection.select_all".localized()) {
+                        ownedVolumes = Array(1...totalVolumes)
+                    }
+                    Button("collection.deselect_all".localized()) {
+                        ownedVolumes.removeAll()
                     }
                 }
 
                 Section(header: Text("collection.readingVolume".localized())) {
-                    Stepper(value: $currentVolume, in: 1...max(totalVolumes, 1))
-                    {
-                        Text("\(currentVolume)")
+                    Picker(
+                        "collection.current_volume".localized(),
+                        selection: $currentVolume
+                    ) {
+                        ForEach(1...totalVolumes, id: \.self) { volume in
+                            Text("collection.volume".localized() + " \(volume)")
+                                .tag(volume)
+                        }
                     }
                 }
 
@@ -49,15 +80,14 @@ struct AddToCollectionSheet: View {
             .navigationTitle("collection.add.title".localized())
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
-                    Button("button.cancel".localized(fallback: "Cancel")) {
+                    Button("button.cancel".localized()) {
                         isPresented = false
                     }
                 }
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("button.save".localized(fallback: "Save")) {
+                    Button("button.save".localized()) {
                         onSave(
-                            volumesPurchased, currentVolume,
-                            isCompleteCollection)
+                            ownedVolumes, currentVolume, isCompleteCollection)
                         isPresented = false
                     }
                 }
@@ -71,20 +101,17 @@ struct AddToCollectionSheet: View {
         }
     }
 
+    private var chunkedVolumes: [[Int]] {
+        let volumes = Array(1...totalVolumes)
+        return stride(from: 0, to: volumes.count, by: 6).map {
+            Array(volumes[$0..<min($0 + 6, volumes.count)])
+        }
+    }
+
     private func updateState() {
         totalVolumes = max(manga.volumes ?? 0, 1)
-        volumesPurchased = initialVolumes ?? min(1, totalVolumes)
+        ownedVolumes = initialVolumes ?? []
         currentVolume = initialReadingVolume ?? 1
         isCompleteCollection = initialComplete ?? false
     }
-}
-
-#Preview {
-    @Previewable @State var show = true
-
-    return AddToCollectionSheet(
-        manga: .preview,
-        isPresented: $show,
-        onSave: { _, _, _ in }
-    )
 }

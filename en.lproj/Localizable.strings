@@ -64,6 +64,11 @@
 "collection.volumesPurchased" = "Volumes Purchased";
 "collection.readingVolume" = "Current Reading Volume";
 "collection.isComplete" = "Collection Complete";
+"collection.volumes" = "Volumes";
+"collection.current_volume" = "Current Volume";
+"collection.volume" = "Volume";
+"collection.select_all" = "Select All";
+"collection.deselect_all" = "Deselect All";
 
 "story & art" = "Story & Art";
 "story" = "Story";
