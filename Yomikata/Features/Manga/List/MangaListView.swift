@@ -40,7 +40,7 @@ struct MangaListView: View {
                                         .fontWeight(.bold)
                                         .foregroundColor(.white)
                                         .frame(width: 16, height: 16)
-                                        .background(Color.yellow)
+                                        .background(Color.red)
                                         .clipShape(Circle())
                                         .offset(x: 12, y: -12)
                                 }
@@ -71,6 +71,38 @@ struct MangaListView: View {
                 SmartFiltersView(
                     isPresented: $showFilters, viewModel: viewModel)
             }
+            .overlay(alignment: .topTrailing) {
+                if !viewModel.searchText.isEmpty {
+                    HStack(spacing: 12) {
+                        // Filtros Button flotante
+                        Button(action: {
+                            showFilters = true
+                        }) {
+                            ZStack {
+                                Image(systemName: "slider.vertical.3")
+                                    .font(.title3)
+                                    .foregroundColor(.accentColor)
+                                    .frame(width: 40, height: 40)
+                                    .background(Color.accentColor.opacity(0.1))
+                                    .clipShape(Circle())
+
+                                // Badge para filtros activos
+                                if viewModel.hasActiveFilter {
+                                    Text("\(viewModel.activeFilterCount)")
+                                        .font(.caption2)
+                                        .fontWeight(.bold)
+                                        .foregroundColor(.white)
+                                        .frame(width: 16, height: 16)
+                                        .background(Color.red)
+                                        .clipShape(Circle())
+                                        .offset(x: 12, y: -12)
+                                }
+                            }
+                        }
+                    }
+                    .padding()
+                }
+            }
             .overlay {
                 // Loading state inicial
                 if viewModel.isLoading && viewModel.mangas.isEmpty {
@@ -78,7 +110,7 @@ struct MangaListView: View {
                         ProgressView()
                             .scaleEffect(1.2)
                         Text(
-                            viewModel.selectedGenre.isEmpty
+                            !viewModel.hasActiveFilter
                                 ? "loading.mangas".localized()
                                 : "loading.filtering".localized()
                         )

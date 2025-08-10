@@ -72,6 +72,25 @@ final class APIService: Sendable {
             from: request, type: [Author].self)
     }
 
+    /// Búsqueda avanzada con múltiples filtros simultáneos
+    func customSearchMangas(
+        _ customSearch: CustomSearch,
+        page: Int = 1,
+        per: Int = APIConstants.defaultItemsPerPage
+    ) async throws -> PaginatedResponse<[Manga]> {
+
+        let endpoint = "\(APIEndpoint.Search.custom)?page=\(page)&per=\(per)"
+        guard let url = URL(string: "\(APIConstants.baseURL)\(endpoint)") else {
+            throw NetworkError.invalidURL
+        }
+
+        let request = try URLRequest.post(url: url, json: customSearch)
+        return try await URLSession.shared.getJSON(
+            from: request, type: PaginatedResponse<[Manga]>.self)
+    }
+
+    // MARK: - Filter Operations
+
     func getGenres() async throws -> [String] {
         let endpoint = APIEndpoint.List.genres
         guard let url = URL(string: "\(APIConstants.baseURL)\(endpoint)") else {
@@ -82,8 +101,6 @@ final class APIService: Sendable {
         return try await URLSession.shared.getJSON(
             from: request, type: [String].self)
     }
-
-    // MARK: - Filter Operations
 
     func getMangasByAuthor(
         _ authorId: String, page: Int = 1,

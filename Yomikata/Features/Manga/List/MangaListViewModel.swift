@@ -9,32 +9,28 @@ final class MangaListViewModel {
     var isLoadingMore = false
     var errorMessage: String?
     var searchText = ""
-    var selectedGenre: String = ""
     var isGridView = false
     private var searchTask: Task<Void, Never>?
+
+    // MARK: - Current Filter State (PARA TRACKING INTERNO)
+    var selectedGenres: [String] = []
+    var selectedThemes: [String] = []
+    var selectedDemographics: [String] = []
+    var selectedAuthors: [String] = []
 
     // MARK: - Filter State (PARA BADGE)
 
     /// Indica si hay algún filtro activo
     var hasActiveFilter: Bool {
-        !selectedGenre.isEmpty || !selectedTheme.isEmpty
-            || !selectedDemographic.isEmpty || !selectedAuthor.isEmpty
+        !selectedGenres.isEmpty || !selectedThemes.isEmpty
+            || !selectedDemographics.isEmpty || !selectedAuthors.isEmpty
     }
 
-    /// Cuenta total de filtros activos (siempre será 1 en versión básica y media , múltiples en versión avanzada)
+    /// Cuenta total de filtros activos (múltiples)
     var activeFilterCount: Int {
-        var count = 0
-        if !selectedGenre.isEmpty { count += 1 }
-        if !selectedTheme.isEmpty { count += 1 }
-        if !selectedDemographic.isEmpty { count += 1 }
-        if !selectedAuthor.isEmpty { count += 1 }
-        return count
+        selectedGenres.count + selectedThemes.count + selectedDemographics.count
+            + selectedAuthors.count
     }
-
-    // MARK: - Current Filter State (PARA TRACKING INTERNO)
-    var selectedTheme: String = ""
-    var selectedDemographic: String = ""
-    var selectedAuthor: String = ""
 
     // MARK: - Search State
     private var isCurrentlySearching: Bool {
@@ -44,21 +40,6 @@ final class MangaListViewModel {
     // MARK: - Filter State
     private var isCurrentlyFiltering: Bool {
         hasActiveFilter
-    }
-    private var currentFilterType: FilterType? {
-        if !selectedGenre.isEmpty { return .genre }
-        if !selectedTheme.isEmpty { return .theme }
-        if !selectedDemographic.isEmpty { return .demographic }
-        if !selectedAuthor.isEmpty { return .author }
-        return nil
-    }
-
-    private var currentFilterValue: String {
-        if !selectedGenre.isEmpty { return selectedGenre }
-        if !selectedTheme.isEmpty { return selectedTheme }
-        if !selectedDemographic.isEmpty { return selectedDemographic }
-        if !selectedAuthor.isEmpty { return selectedAuthor }
-        return ""
     }
 
     var availableGenres: [String] = []
@@ -124,24 +105,29 @@ final class MangaListViewModel {
 
             if isCurrentlySearching {
                 // Búsqueda con paginación
-                response = try await apiService.searchMangasContains(
-                    searchText, page: nextPage)
-            } else if isCurrentlyFiltering, let filterType = currentFilterType {
-                // Filtros con paginación
-                switch filterType {
-                case .genre:
-                    response = try await apiService.getMangasByGenre(
-                        currentFilterValue, page: nextPage)
-                case .theme:
-                    response = try await apiService.getMangasByTheme(
-                        currentFilterValue, page: nextPage)
-                case .demographic:
-                    response = try await apiService.getMangasByDemographic(
-                        currentFilterValue, page: nextPage)
-                case .author:
-                    response = try await apiService.getMangasByAuthor(
-                        currentFilterValue, page: nextPage)
-                }
+                let customSearch = CustomSearch(
+                    searchTitle: searchText,
+                    searchGenres: selectedGenres.isEmpty ? nil : selectedGenres,
+                    searchThemes: selectedThemes.isEmpty ? nil : selectedThemes,
+                    searchDemographics: selectedDemographics.isEmpty
+                        ? nil : selectedDemographics,
+                    searchContains: true
+                )
+
+                response = try await apiService.customSearchMangas(
+                    customSearch, page: nextPage)
+            } else if isCurrentlyFiltering {
+                // Filtros con paginación usando CustomSearch
+                let customSearch = CustomSearch(
+                    searchTitle: nil,
+                    searchGenres: selectedGenres.isEmpty ? nil : selectedGenres,
+                    searchThemes: selectedThemes.isEmpty ? nil : selectedThemes,
+                    searchDemographics: selectedDemographics.isEmpty
+                        ? nil : selectedDemographics,
+                    searchContains: true
+                )
+                response = try await apiService.customSearchMangas(
+                    customSearch, page: nextPage)
             } else {
                 response = try await apiService.getMangas(
                     page: nextPage, per: APIConstants.defaultItemsPerPage)
@@ -206,6 +192,40 @@ final class MangaListViewModel {
         }
     }
 
+    /// Aplica filtros múltiples usando CustomSearch
+    func applyCustomFilters() async {
+        guard hasActiveFilter || !searchText.isEmpty else {
+            await loadMangas()
+            return
+        }
+
+        isLoading = true
+        defer { isLoading = false }
+
+        do {
+            let customSearch = CustomSearch(
+                searchTitle: searchText.isEmpty ? nil : searchText,
+                searchGenres: selectedGenres.isEmpty ? nil : selectedGenres,
+                searchThemes: selectedThemes.isEmpty ? nil : selectedThemes,
+                searchDemographics: selectedDemographics.isEmpty
+                    ? nil : selectedDemographics,
+                searchContains: true
+            )
+
+            let response = try await apiService.customSearchMangas(customSearch)
+            mangas = response.items
+            errorMessage = nil
+
+            paginationManager.reset()
+            paginationManager.updateWith(response: response)
+
+            print("✅ Custom filters applied: \(response.items.count) mangas")
+        } catch {
+            errorMessage = error.localizedDescription
+            print("🔥 Error applying custom filters: \(error)")
+        }
+    }
+
     // MARK: - Search and Filtering
 
     /// Busca mangas por su titulo
@@ -221,11 +241,10 @@ final class MangaListViewModel {
 
             if searchText.isEmpty {
                 // FIX: Si no hay búsqueda, verificar si hay filtros activos
-                if isCurrentlyFiltering, let filterType = currentFilterType {
-                    // Volver al filtro que estaba activo
-                    await applySingleFilter(
-                        type: filterType, value: currentFilterValue)
-                    print("Active filter: \(currentFilterValue)")
+                if isCurrentlyFiltering {
+                    // Volver a los filtros que estaban activos
+                    await applyCustomFilters()
+                    print("Active filters applied")
                 } else {
                     // Si no hay filtros, volver al listado normal
                     await loadMangas()
@@ -236,19 +255,24 @@ final class MangaListViewModel {
                 defer { isLoading = false }
 
                 do {
-                    let response = try await apiService.searchMangasContains(
-                        searchText)
+                    let customSearch = CustomSearch(
+                        searchTitle: searchText,
+                        searchGenres: selectedGenres.isEmpty
+                            ? nil : selectedGenres,
+                        searchThemes: selectedThemes.isEmpty
+                            ? nil : selectedThemes,
+                        searchDemographics: selectedDemographics.isEmpty
+                            ? nil : selectedDemographics,
+                        searchContains: true
+                    )
+
+                    let response = try await apiService.customSearchMangas(
+                        customSearch)
+
                     guard !Task.isCancelled else { return }
 
                     mangas = response.items
                     errorMessage = nil
-
-                    if mangas.count > 8 {
-                        print("⚠️ PROBLEMA: mangas array tiene más de 8 items!")
-                        print(
-                            "🔍 Items 9+: \(mangas.dropFirst(8).map { $0.title })"
-                        )
-                    }
 
                     paginationManager.reset()
                     paginationManager.updateWith(response: response)
@@ -265,98 +289,55 @@ final class MangaListViewModel {
         }
     }
 
-    // IMPORTANT: Limpiar otros filtros (Versión básica/media: solo uno activo)
+    // MARK: - Multiple Filter Methods
 
-    /// Filtra por género
-    func filterByGenre(_ genre: String) async {
-        selectedTheme = ""
-        selectedDemographic = ""
-        selectedAuthor = ""
-        selectedGenre = genre
-
-        await applySingleFilter(type: .genre, value: genre)
+    /// Agrega/quita un género de los filtros
+    func toggleGenre(_ genre: String) async {
+        if selectedGenres.contains(genre) {
+            selectedGenres.removeAll { $0 == genre }
+        } else {
+            selectedGenres.append(genre)
+        }
+        await applyCustomFilters()
     }
 
-    /// Filtra por tema
-    func filterByTheme(_ theme: String) async {
-        selectedGenre = ""
-        selectedDemographic = ""
-        selectedAuthor = ""
-        selectedTheme = theme
-
-        await applySingleFilter(type: .theme, value: theme)
+    /// Agrega/quita un tema de los filtros
+    func toggleTheme(_ theme: String) async {
+        if selectedThemes.contains(theme) {
+            selectedThemes.removeAll { $0 == theme }
+        } else {
+            selectedThemes.append(theme)
+        }
+        await applyCustomFilters()
     }
 
-    /// Filtra por demográfica
-    func filterByDemographic(_ demographic: String) async {
-        selectedGenre = ""
-        selectedTheme = ""
-        selectedAuthor = ""
-        selectedDemographic = demographic
-
-        await applySingleFilter(type: .demographic, value: demographic)
+    /// Agrega/quita una demografía de los filtros
+    func toggleDemographic(_ demographic: String) async {
+        if selectedDemographics.contains(demographic) {
+            selectedDemographics.removeAll { $0 == demographic }
+        } else {
+            selectedDemographics.append(demographic)
+        }
+        await applyCustomFilters()
     }
 
-    /// Filtra por autor
-    func filterByAuthor(_ authorId: String) async {
-        selectedGenre = ""
-        selectedTheme = ""
-        selectedDemographic = ""
-        selectedAuthor = authorId
-
-        await applySingleFilter(type: .author, value: authorId)
+    /// Agrega/quita un autor de los filtros
+    func toggleAuthor(_ authorId: String) async {
+        if selectedAuthors.contains(authorId) {
+            selectedAuthors.removeAll { $0 == authorId }
+        } else {
+            selectedAuthors.append(authorId)
+        }
+        await applyCustomFilters()
     }
 
     /// Limpia todos los filtros
     func clearAllFilters() async {
-        selectedGenre = ""
-        selectedTheme = ""
-        selectedDemographic = ""
-        selectedAuthor = ""
+        selectedGenres.removeAll()
+        selectedThemes.removeAll()
+        selectedDemographics.removeAll()
+        selectedAuthors.removeAll()
         await loadMangas()
-    }
-
-    // MARK: - Private Methods
-
-    private enum FilterType {
-        case genre, theme, demographic, author
-    }
-
-    /// Aplica un filtro específico
-    private func applySingleFilter(type: FilterType, value: String) async {
-        guard !value.isEmpty else {
-            await loadMangas()
-            return
-        }
-
-        isLoading = true
-        defer { isLoading = false }
-
-        do {
-            let response: PaginatedResponse<[Manga]>
-
-            switch type {
-            case .genre:
-                response = try await apiService.getMangasByGenre(value)
-            case .theme:
-                response = try await apiService.getMangasByTheme(value)
-            case .demographic:
-                response = try await apiService.getMangasByDemographic(value)
-            case .author:
-                response = try await apiService.getMangasByAuthor(value)
-            }
-
-            mangas = response.items
-            errorMessage = nil
-
-            paginationManager.reset()
-            paginationManager.updateWith(response: response)
-
-            print("✅ Filter applied: \(response.items.count) mangas")
-        } catch {
-            errorMessage = error.localizedDescription
-            print("🔥 Error applying filter: \(error)")
-        }
     }
 
     // MARK: - Computed Properties

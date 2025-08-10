@@ -9,8 +9,8 @@ struct SmartFiltersView: View {
     @State private var selectedDemographics: Set<String> = []
     @State private var selectedAuthors: Set<Author> = []
 
-    // Cambiar esto a true cuando se implemente la DB local
-    private let supportsMultipleFilters: Bool = false
+    // Cambiar esto a true para filtros múltiples
+    private let supportsMultipleFilters: Bool = true
 
     var body: some View {
         NavigationView {
@@ -23,7 +23,7 @@ struct SmartFiltersView: View {
                         selectedItems: $selectedGenres,
                         displayTransform: { $0.localizedGenre },
                         onSelectionChange: { genre in
-                            handleSingleSelection(
+                            handleMultipleSelection(
                                 item: genre, targetSet: $selectedGenres)
                         }
                     )
@@ -35,7 +35,7 @@ struct SmartFiltersView: View {
                         selectedItems: $selectedThemes,
                         displayTransform: { $0.localizedTheme },
                         onSelectionChange: { theme in
-                            handleSingleSelection(
+                            handleMultipleSelection(
                                 item: theme, targetSet: $selectedThemes)
                         }
                     )
@@ -47,7 +47,7 @@ struct SmartFiltersView: View {
                         selectedItems: $selectedDemographics,
                         displayTransform: { $0.localizedDemographic },
                         onSelectionChange: { demographic in
-                            handleSingleSelection(
+                            handleMultipleSelection(
                                 item: demographic,
                                 targetSet: $selectedDemographics)
                         }
@@ -61,7 +61,7 @@ struct SmartFiltersView: View {
                             selectedItems: $selectedAuthors,
                             displayTransform: { $0.fullName },
                             onSelectionChange: { author in
-                                handleSingleSelection(
+                                handleMultipleSelection(
                                     item: author, targetSet: $selectedAuthors)
                             }
                         )
@@ -119,41 +119,14 @@ struct SmartFiltersView: View {
         }
     }
 
-    private func handleSingleSelection<T: Hashable>(
+    private func handleMultipleSelection<T: Hashable>(
         item: T, targetSet: Binding<Set<T>>
     ) {
-        // Limpiar TODOS los otros sets primero
-        clearAllOtherSelections(except: targetSet)
-
-        // Toggle en el set actual
+        // Toggle en el set actual (permitir múltiples)
         if targetSet.wrappedValue.contains(item) {
             targetSet.wrappedValue.remove(item)
         } else {
-            targetSet.wrappedValue = [item]  // Solo este item
-        }
-    }
-
-    private func clearAllOtherSelections<T>(except keepSet: Binding<Set<T>>) {
-        // Limpiar todos excepto el que se está modificando
-        if !(keepSet.wrappedValue is Set<String>)
-            || keepSet.wrappedValue as? Set<String> != selectedGenres
-        {
-            selectedGenres.removeAll()
-        }
-        if !(keepSet.wrappedValue is Set<String>)
-            || keepSet.wrappedValue as? Set<String> != selectedThemes
-        {
-            selectedThemes.removeAll()
-        }
-        if !(keepSet.wrappedValue is Set<String>)
-            || keepSet.wrappedValue as? Set<String> != selectedDemographics
-        {
-            selectedDemographics.removeAll()
-        }
-        if !(keepSet.wrappedValue is Set<Author>)
-            || keepSet.wrappedValue as? Set<Author> != selectedAuthors
-        {
-            selectedAuthors.removeAll()
+            targetSet.wrappedValue.insert(item)
         }
     }
 
@@ -163,21 +136,16 @@ struct SmartFiltersView: View {
     }
 
     private func loadCurrentFilters() {
-        // Cargar todos los tipos de filtros activos del ViewModel
-        if !viewModel.selectedGenre.isEmpty {
-            selectedGenres = [viewModel.selectedGenre]
-        } else if !viewModel.selectedTheme.isEmpty {
-            selectedThemes = [viewModel.selectedTheme]
-        } else if !viewModel.selectedDemographic.isEmpty {
-            selectedDemographics = [viewModel.selectedDemographic]
-        } else if !viewModel.selectedAuthor.isEmpty {
-            // Buscar el autor por ID en la lista disponible
-            if let author = viewModel.availableAuthors.first(where: {
-                $0.id == viewModel.selectedAuthor
-            }) {
-                selectedAuthors = [author]
-            }
-        }
+        // Cargar filtros múltiples del ViewModel
+        selectedGenres = Set(viewModel.selectedGenres)
+        selectedThemes = Set(viewModel.selectedThemes)
+        selectedDemographics = Set(viewModel.selectedDemographics)
+
+        // Convertir IDs de autores a objetos Author
+        selectedAuthors = Set(
+            viewModel.selectedAuthors.compactMap { authorId in
+                viewModel.availableAuthors.first { $0.id == authorId }
+            })
     }
 
     private func loadAllFilterData() {
@@ -191,18 +159,13 @@ struct SmartFiltersView: View {
 
     private func applyFilters() {
         Task {
-            // Aplicar solo el primer filtro encontrado
-            if let firstGenre = selectedGenres.first {
-                await viewModel.filterByGenre(firstGenre)
-            } else if let firstTheme = selectedThemes.first {
-                await viewModel.filterByTheme(firstTheme)
-            } else if let firstDemographic = selectedDemographics.first {
-                await viewModel.filterByDemographic(firstDemographic)
-            } else if let firstAuthor = selectedAuthors.first {
-                await viewModel.filterByAuthor(firstAuthor.id)
-            } else {
-                await viewModel.clearAllFilters()
-            }
+            // Aplicar todos los filtros seleccionados
+            viewModel.selectedGenres = Array(selectedGenres)
+            viewModel.selectedThemes = Array(selectedThemes)
+            viewModel.selectedDemographics = Array(selectedDemographics)
+            viewModel.selectedAuthors = selectedAuthors.map { $0.id }
+
+            await viewModel.applyCustomFilters()
         }
     }
 
@@ -280,7 +243,9 @@ struct FilterChip: View {
                 .padding(.vertical, 8)
                 .background(
                     RoundedRectangle(cornerRadius: 16)
-                        .fill(isSelected ? Color.accentColor : Color.gray.opacity(0.1))
+                        .fill(
+                            isSelected
+                                ? Color.accentColor : Color.gray.opacity(0.1))
                 )
                 .foregroundColor(isSelected ? .white : .primary)
                 .overlay(
