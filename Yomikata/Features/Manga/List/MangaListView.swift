@@ -72,7 +72,9 @@ struct MangaListView: View {
                     isPresented: $showFilters, viewModel: viewModel)
             }
             .overlay(alignment: .topTrailing) {
-                if !viewModel.searchText.isEmpty {
+                if !viewModel.searchText.isEmpty
+                    && UIDevice.current.userInterfaceIdiom != .pad
+                {
                     HStack(spacing: 12) {
                         // Filtros Button flotante
                         Button(action: {
