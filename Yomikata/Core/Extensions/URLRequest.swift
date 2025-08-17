@@ -27,3 +27,20 @@ extension URLRequest {
         return request
     }
 }
+
+extension URLRequest {
+    static func post(url: URL) -> URLRequest {
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 25
+        request.httpMethod = HTTPMethod.post.rawValue
+        request.setValue("application/json", forHTTPHeaderField: "Accept")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        return request
+    }
+
+    func adding(headers: [String: String]) -> URLRequest {
+        var r = self
+        headers.forEach { r.setValue($0.value, forHTTPHeaderField: $0.key) }
+        return r
+    }
+}

@@ -1,5 +1,12 @@
 enum APIEndpoint {
 
+    // MARK: - Users  // PATCH ▼
+    enum Users {
+        static let register = "/users"  // POST (App-Token)
+        static let login = "/users/login"  // POST (Basic)
+        static let renew = "/users/renew"  // POST (Bearer)
+    }
+
     // MARK: - List
     enum List {
         static let mangas = "/list/mangas"

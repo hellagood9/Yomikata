@@ -184,3 +184,13 @@
 "theme.educational" = "Educativo";
 "theme.idols_female" = "Idols (femeninas)";
 "theme.idols_male" = "Idols (masculinos)";
+
+"auth.title" = "Cuenta";
+"auth.email" = "Email";
+"auth.password" = "Contraseña (≥8)";
+"auth.mode.login" = "Login";
+"auth.mode.register" = "Registro";
+"auth.button.login" = "Entrar";
+"auth.button.register" = "Crear cuenta";
+"auth.error.invalid_fields" = "Email o contraseña inválidos (min. 8 caracteres).";
+"auth.logout" = "Cerrar sesión";

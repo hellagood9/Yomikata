@@ -9,14 +9,11 @@ extension URLSession {
                 throw NetworkError.connectionFailed
             }
 
-            guard httpURLResponse.statusCode == 200 else {
+            guard (200...299).contains(httpURLResponse.statusCode) else {
                 switch httpURLResponse.statusCode {
-                case 401:
-                    throw NetworkError.unauthorized
-                case 403:
-                    throw NetworkError.forbidden
-                case 404:
-                    throw NetworkError.notFound
+                case 401: throw NetworkError.unauthorized
+                case 403: throw NetworkError.forbidden
+                case 404: throw NetworkError.notFound
                 default:
                     throw NetworkError.serverError(httpURLResponse.statusCode)
                 }

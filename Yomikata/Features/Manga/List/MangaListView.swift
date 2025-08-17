@@ -3,6 +3,7 @@ import SwiftUI
 struct MangaListView: View {
     @State private var viewModel = MangaListViewModel()
     @State private var showFilters = false
+    @State private var showAuth = false
 
     var body: some View {
         NavigationStack {
@@ -14,7 +15,7 @@ struct MangaListView: View {
                 }
             }
             .navigationTitle(
-                "mangas.navigation.title".localized(fallback: "Mangas")
+                "mangas.navigation.title".localized()
             )
             .searchable(text: $viewModel.searchText)
             .onChange(of: viewModel.searchText) {
@@ -57,6 +58,23 @@ struct MangaListView: View {
                             )
                             .font(.title3)
                         }
+
+                        Menu {
+                            Button(role: .destructive) {
+                                Task {
+                                    _ = await APIService().logout()
+                                    await MainActor.run { showAuth = true }
+                                }
+                            } label: {
+                                Label(
+                                    "Log out",
+                                    systemImage:
+                                        "rectangle.portrait.and.arrow.right")
+                            }
+                        } label: {
+                            Image(systemName: "person.crop.circle")
+                                .font(.title3)
+                        }
                     }
                 }
             }
@@ -70,6 +88,11 @@ struct MangaListView: View {
             .sheet(isPresented: $showFilters) {
                 SmartFiltersView(
                     isPresented: $showFilters, viewModel: viewModel)
+            }
+            .fullScreenCover(isPresented: $showAuth) {
+                AuthView {
+                    showAuth = false
+                }
             }
             .overlay(alignment: .topTrailing) {
                 if !viewModel.searchText.isEmpty

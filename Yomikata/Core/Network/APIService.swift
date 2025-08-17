@@ -1,5 +1,12 @@
 import Foundation
 
+#if DEBUG
+    import os
+    private let apiLog = Logger(
+        subsystem: Bundle.main.bundleIdentifier ?? "Yomikata",
+        category: "API")
+#endif
+
 final class APIService: Sendable {
 
     // MARK: - Manga Operations
@@ -198,5 +205,174 @@ extension APIService {
         let request = URLRequest.get(url: url)
         return try await URLSession.shared.getJSON(
             from: request, type: [Author].self)
+    }
+}
+
+// MARK: - Users (register / login / renew)
+extension APIService {
+
+    func registerUser(email: String, password: String) async throws {
+        let email = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        guard let url = URL(string: "\(APIConstants.baseURL)/users") else {
+            throw NetworkError.invalidURL
+        }
+
+        var req = try URLRequest.post(
+            url: url, json: Users(email: email, password: password))
+        req = req.adding(headers: [
+            APIConstants.appTokenHeader: APIConstants.appToken
+        ])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else {
+            throw NetworkError.connectionFailed
+        }
+
+        #if DEBUG
+            let body = String(data: data, encoding: .utf8) ?? ""
+            apiLog.info(
+                "⬅️ /users status: \(http.statusCode) | body: \(body, privacy: .public)"
+            )
+        #endif
+
+        switch http.statusCode {
+        case 200...299: return
+        case 401: throw NetworkError.unauthorized
+        case 403: throw NetworkError.forbidden
+        case 404: throw NetworkError.notFound
+        default: throw NetworkError.serverError(http.statusCode)
+        }
+    }
+
+    // Login (Basic) -> token como String plano
+    func loginUser(email: String, password: String) async throws -> String {
+        let email = email.trimmingCharacters(in: .whitespacesAndNewlines)
+            .lowercased()
+        guard let url = URL(string: "\(APIConstants.baseURL)/users/login")
+        else {
+            throw NetworkError.invalidURL
+        }
+
+        var req = URLRequest.post(url: url)  // sin body
+        let basic = Data("\(email):\(password)".utf8).base64EncodedString()
+        req = req.adding(headers: ["Authorization": "Basic \(basic)"])
+
+        let (data, resp) = try await URLSession.shared.data(for: req)
+        guard let http = resp as? HTTPURLResponse else {
+            throw NetworkError.connectionFailed
+        }
+
+        #if DEBUG
+            let raw = String(data: data, encoding: .utf8) ?? ""
+            apiLog.info(
+                "⬅️ /users/login(Basic) status: \(http.statusCode) | body: \(raw, privacy: .public)"
+            )
+        #endif
+
+        guard (200...299).contains(http.statusCode) else {
+            switch http.statusCode {
+            case 401: throw NetworkError.unauthorized
+            case 403: throw NetworkError.forbidden
+            case 404: throw NetworkError.notFound
+            default: throw NetworkError.serverError(http.statusCode)
+            }
+        }
+
+        guard
+            let token = String(data: data, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+            !token.isEmpty
+        else {
+            throw NetworkError.decodingFailed(URLError(.cannotDecodeRawData))
+        }
+        return token
+    }
+
+    // Renew (Bearer + App-Token). Acepta JSON {token: "..."} o string plano
+    // Devuelve true si guardó token nuevo. Si falla, NO limpia; ya se validará luego
+    @discardableResult
+    func renewTokenIfNeeded() async -> Bool {
+        guard let current = await AuthTokenStore.shared.load() else {
+            return false
+        }
+        guard
+            let url = URL(
+                string: "\(APIConstants.baseURL)\(APIEndpoint.Users.renew)")
+        else { return false }
+
+        var req = URLRequest.post(url: url)
+        req = req.adding(headers: [
+            "Authorization": "Bearer \(current)",
+            APIConstants.appTokenHeader: APIConstants.appToken,
+        ])
+
+        do {
+            let (data, resp) = try await URLSession.shared.data(for: req)
+            guard let http = resp as? HTTPURLResponse else { return false }
+
+            #if DEBUG
+                print(
+                    "⬅️ /users/renew status:", http.statusCode, "| body:",
+                    String(data: data, encoding: .utf8) ?? "")
+            #endif
+
+            if http.statusCode == 401 {
+                await AuthTokenStore.shared.clear()  // LIMPIAR Token si 401
+                return false
+            }
+            guard (200...299).contains(http.statusCode) else { return false }
+
+            // acepta JSON {token:"..."} o string plano
+            if let json = try? JSONDecoder().decode(
+                TokenResponse.self, from: data),
+                !json.token.isEmpty
+            {
+                try await AuthTokenStore.shared.save(json.token)
+                return true
+            }
+            if let token = String(data: data, encoding: .utf8)?
+                .trimmingCharacters(in: .whitespacesAndNewlines),
+                !token.isEmpty
+            {
+                try await AuthTokenStore.shared.save(token)
+                return true
+            }
+            return false
+        } catch {
+            #if DEBUG
+                print("🔁 Renew FAILED:", error)
+            #endif
+            return false
+        }
+    }
+
+    // Logout
+    @discardableResult
+    func logout() async -> Bool { await AuthTokenStore.shared.clear() }
+}
+
+// MARK: - Bearer helpers
+extension APIService {
+    fileprivate func bearerRequest(url: URL, method: HTTPMethod = .get)
+        async throws -> URLRequest
+    {
+        guard let token = await AuthTokenStore.shared.load() else {
+            throw NetworkError.unauthorized
+        }
+        var req = URLRequest(url: url)
+        req.httpMethod = method.rawValue
+        req.setValue("application/json", forHTTPHeaderField: "Accept")
+        req.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        return req
+    }
+
+    fileprivate func bearerJSONRequest<Body: Encodable>(
+        url: URL, method: HTTPMethod = .post, json body: Body
+    ) async throws -> URLRequest {
+        var req = try await bearerRequest(url: url, method: method)
+        req.setValue("application/json", forHTTPHeaderField: "Content-Type")
+        req.httpBody = try JSONEncoder().encode(body)
+        return req
     }
 }
