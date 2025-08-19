@@ -354,7 +354,7 @@ extension APIService {
 
 // MARK: - Bearer helpers
 extension APIService {
-    fileprivate func bearerRequest(url: URL, method: HTTPMethod = .get)
+    func bearerRequest(url: URL, method: HTTPMethod = .get)
         async throws -> URLRequest
     {
         guard let token = await AuthTokenStore.shared.load() else {
@@ -367,7 +367,7 @@ extension APIService {
         return req
     }
 
-    fileprivate func bearerJSONRequest<Body: Encodable>(
+    func bearerJSONRequest<Body: Encodable>(
         url: URL, method: HTTPMethod = .post, json body: Body
     ) async throws -> URLRequest {
         var req = try await bearerRequest(url: url, method: method)

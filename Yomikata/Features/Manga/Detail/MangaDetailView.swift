@@ -2,7 +2,7 @@ import SwiftUI
 
 struct MangaDetailView: View {
     let manga: Manga
-    @State private var viewModel = MangaDetailViewModel()
+    @State private var viewModel = RemoteMangaDetailViewModel()
     @State private var showAddSheet = false
 
     var body: some View {
@@ -55,8 +55,8 @@ struct MangaDetailView: View {
                 }
             }
         }
-        .task {
-            viewModel.checkCollectionStatus(for: manga)
+        .task(id: manga.id) {
+            await viewModel.checkCollectionStatus(for: manga)
         }
     }
 }

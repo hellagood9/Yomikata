@@ -10,7 +10,7 @@ struct MainTabView: View {
                         .foregroundColor(.accentColor)
                 }
 
-            CollectionView()
+            RemoteCollectionView()
                 .tabItem {
                     Image(systemName: "bookmark.fill")
                     Text("tabs.collection".localized(fallback: "Collection"))
