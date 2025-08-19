@@ -6,7 +6,6 @@ struct AuthView: View {
     @FocusState private var focused: Field?
 
     let onAuthenticated: @MainActor () -> Void
-
     private enum Field: Hashable { case email, password }
 
     var body: some View {
@@ -46,6 +45,7 @@ struct AuthView: View {
                             .font(.footnote)
                     }
                 }
+
                 Section {
                     let title =
                         vm.mode == .login
@@ -62,21 +62,33 @@ struct AuthView: View {
                             .frame(maxWidth: .infinity, minHeight: 44)
                     }
                     .buttonStyle(.borderedProminent)
-                    .tint(.accentColor)
+                    .tint(Color.accentColor)
                     .disabled(!vm.isValid || vm.isBusy)
-                    .overlay {
-                        if vm.isBusy { ProgressView() }
-                    }
+                    .overlay { if vm.isBusy { ProgressView() } }
                 }
                 .listRowInsets(
                     .init(top: 4, leading: 16, bottom: 4, trailing: 16)
                 )
                 .listRowBackground(Color.clear)
-
             }
-            .scrollContentBackground(.hidden)  // quita el fondo gris del Form
-            .background(Color.accentColor.opacity(0.1))
+            .scrollContentBackground(.hidden)
+
+            .safeAreaInset(edge: .top) {
+                VStack(spacing: 8) {
+                    Image("yomikata-logo")
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxWidth: 140, maxHeight: 140)
+                        .accessibilityHidden(true)
+                }
+                .padding(.top, 8)
+                .padding(.bottom, 4)
+                .background(Color.clear)
+            }
+
+            .background(Color.accentColor.opacity(0.2))
             .navigationTitle("auth.title".localized())
+            .navigationBarTitleDisplayMode(.inline)
             .submitLabel(focused == .email ? .next : .go)
             .onSubmit {
                 if focused == .email {
@@ -91,4 +103,5 @@ struct AuthView: View {
         }
         .tint(Color.accentColor)
     }
+
 }

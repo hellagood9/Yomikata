@@ -6,7 +6,7 @@ enum NetworkError: LocalizedError, Sendable {
     case unauthorized
     case forbidden
     case notFound
-    case serverError(Int)
+    case serverError(Int, reason: String? = nil)
     case decodingFailed(Error)
     case requestFailed(Error)
     case noData
@@ -28,7 +28,18 @@ enum NetworkError: LocalizedError, Sendable {
         case .notFound:
             return "network_error_not_found".localized(
                 fallback: "Resource not found")
-        case .serverError(let code):
+        case .serverError(let code, let reason):
+            if let r = reason?.lowercased() {
+                if r.contains("email is not a valid email address") {
+                    return "auth.error.invalid_email".localized(
+                        fallback: "Email is not a valid email address.")
+                }
+                if r.contains("user already exists") {
+                    return "auth.error.user_exists".localized(
+                        fallback: "User already exists.")
+                }
+            }
+
             return "network_error_server_\(code)".localized(
                 fallback: "Server error: \(code)")
         case .decodingFailed(let error):

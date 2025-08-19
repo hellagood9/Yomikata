@@ -192,5 +192,9 @@
 "auth.mode.register" = "Registro";
 "auth.button.login" = "Entrar";
 "auth.button.register" = "Crear cuenta";
-"auth.error.invalid_fields" = "Email o contraseña inválidos (min. 8 caracteres).";
 "auth.logout" = "Cerrar sesión";
+"auth.error.invalid_fields" = "Email o contraseña inválidos (min. 8 caracteres).";
+"auth.error.invalid_email" = "El email no es válido.";
+"auth.error.user_exists" = "El usuario ya existe.";
+"auth.error.generic" = "Ha ocurrido un error.";
+

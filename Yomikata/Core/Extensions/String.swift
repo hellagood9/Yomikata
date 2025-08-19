@@ -41,3 +41,13 @@ extension String {
         return localized == genreKey ? self.capitalized : localized
     }
 }
+
+extension String {
+    var isValidEmail: Bool {
+        let email = trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
+        
+        let regex =
+        "^[A-Z0-9._%+-]+@[A-Z0-9-]+\\.[A-Z]{2,63}(?:\\.[A-Z]{2,63})*$"
+        return NSPredicate(format: "SELF MATCHES[c] %@", regex).evaluate(with: email)
+    }
+}

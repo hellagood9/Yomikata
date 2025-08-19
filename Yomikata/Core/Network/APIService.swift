@@ -208,6 +208,11 @@ extension APIService {
     }
 }
 
+private struct ServerErrorBody: Decodable {
+    let error: Bool?
+    let reason: String?
+}
+
 // MARK: - Users (register / login / renew)
 extension APIService {
 
@@ -236,12 +241,17 @@ extension APIService {
             )
         #endif
 
-        switch http.statusCode {
-        case 200...299: return
-        case 401: throw NetworkError.unauthorized
-        case 403: throw NetworkError.forbidden
-        case 404: throw NetworkError.notFound
-        default: throw NetworkError.serverError(http.statusCode)
+        guard (200...299).contains(http.statusCode) else {
+            let reason =
+                (try? JSONDecoder().decode(ServerErrorBody.self, from: data))?
+                .reason
+            switch http.statusCode {
+            case 401: throw NetworkError.unauthorized
+            case 403: throw NetworkError.forbidden
+            case 404: throw NetworkError.notFound
+            default:
+                throw NetworkError.serverError(http.statusCode, reason: reason)
+            }
         }
     }
 
@@ -271,11 +281,15 @@ extension APIService {
         #endif
 
         guard (200...299).contains(http.statusCode) else {
+            let reason =
+                (try? JSONDecoder().decode(ServerErrorBody.self, from: data))?
+                .reason
             switch http.statusCode {
             case 401: throw NetworkError.unauthorized
             case 403: throw NetworkError.forbidden
             case 404: throw NetworkError.notFound
-            default: throw NetworkError.serverError(http.statusCode)
+            default:
+                throw NetworkError.serverError(http.statusCode, reason: reason)
             }
         }
 

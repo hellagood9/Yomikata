@@ -192,5 +192,9 @@
 "auth.mode.register" = "Register";
 "auth.button.login" = "Sign in";
 "auth.button.register" = "Create account";
-"auth.error.invalid_fields" = "Invalid email or password (min. 8 characters).";
 "auth.logout" = "Log out";
+"auth.error.invalid_fields" = "Invalid email or password (min. 8 characters).";
+"auth.error.invalid_email" = "Email is not a valid email address.";
+"auth.error.user_exists" = "User already exists.";
+"auth.error.generic" = "Something went wrong.";
+

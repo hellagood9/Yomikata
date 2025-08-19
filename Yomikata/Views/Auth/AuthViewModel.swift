@@ -16,7 +16,7 @@ final class AuthViewModel: ObservableObject {
 
 extension AuthViewModel {
     var isValid: Bool {
-        email.contains("@") && email.contains(".") && password.count >= 8
+        email.isValidEmail && password.count >= 8
     }
 
     func submit(onSuccess: @MainActor @escaping () -> Void) {
@@ -63,9 +63,15 @@ extension AuthViewModel {
                     onSuccess()
                 }
             } catch {
+
                 await MainActor.run {
                     self.isBusy = false
-                    self.error = error.localizedDescription
+                    if let net = error as? NetworkError {
+                        self.error = net.errorDescription
+                    } else {
+                        self.error = "auth.error.generic".localized(
+                            fallback: error.localizedDescription)
+                    }
                 }
             }
         }
